@@ -1,5 +1,8 @@
 import DevToolsBrowserProtocol from 'devtools-protocol/json/browser_protocol.json';
-import { devToolsProtocolsByVersionSlug } from '@/data/protocols';
+import {
+  ProtocolDomain,
+  devToolsProtocolsByVersionSlug,
+} from '@/data/protocols';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import React, { ReactNode } from 'react';
@@ -28,13 +31,13 @@ export default async function Page({
         <h2 className="font-bold text-lg p-4">Versions</h2>
         <ul className="p-4 list-inside">
           {Array.from(devToolsProtocolsByVersionSlug.values()).map(
-            ({ metadata: { versionSlug }, protocol: { version } }) => (
+            ({ metadata: { versionName, versionSlug } }) => (
               <li key={versionSlug} className="mb-2 list-disc">
                 <Link
                   href={`/devtools-protocol/${versionSlug}`}
                   className="text-blue-600 hover:underline"
                 >
-                  {version.major}.{version.minor}
+                  {versionName}
                 </Link>
               </li>
             ),
@@ -84,7 +87,7 @@ async function Domain({
   domain,
   versionSlug,
 }: {
-  domain: (typeof DevToolsBrowserProtocol)['domains'][0];
+  domain: ProtocolDomain;
   versionSlug: string;
 }) {
   return (
@@ -116,7 +119,7 @@ async function Domain({
             ))
           }
         </ul>
-        {domain.events && (
+        {(domain.events?.length ?? 0) !== 0 && (
           <>
             <h3 className="font-bold text-lg mt-4 mb-2">Events</h3>
             <ul>
@@ -142,7 +145,7 @@ async function Domain({
             </ul>
           </>
         )}
-        {domain.types && (
+        {(domain.types?.length ?? 0) !== 0 && (
           <>
             <h3 className="font-bold text-lg mt-4 mb-2">Types</h3>
             <ul>
@@ -228,36 +231,38 @@ async function Domain({
                 ))}
               </>
             )}
-            {'returns' in command && command.returns?.length && (
-              <>
-                <h4 className="font-bold text-lg mt-4 mb-2">Return object</h4>
-                {command.returns.map((prop) => (
-                  <React.Fragment key={prop.name}>
-                    <div className="flex flex-row">
-                      <div className="w-1/4">
-                        <code className="font-mono">{prop.name}</code>
+            {'returns' in command &&
+              command.returns != null &&
+              command.returns.length !== 0 && (
+                <>
+                  <h4 className="font-bold text-lg mt-4 mb-2">Return object</h4>
+                  {command.returns.map((prop) => (
+                    <React.Fragment key={prop.name}>
+                      <div className="flex flex-row">
+                        <div className="w-1/4">
+                          <code className="font-mono">{prop.name}</code>
+                        </div>
+                        <div className="w-1/4">
+                          <TypeLink
+                            domain={domain.domain}
+                            type={prop as any}
+                            versionSlug={versionSlug}
+                          />
+                        </div>
+                        <div className="w-3/4">
+                          {'description' in prop && prop.description && (
+                            <Markdown>{prop.description}</Markdown>
+                          )}
+                        </div>
                       </div>
-                      <div className="w-1/4">
-                        <TypeLink
-                          domain={domain.domain}
-                          type={prop as any}
-                          versionSlug={versionSlug}
-                        />
-                      </div>
-                      <div className="w-3/4">
-                        {'description' in prop && prop.description && (
-                          <Markdown>{prop.description}</Markdown>
-                        )}
-                      </div>
-                    </div>
-                  </React.Fragment>
-                ))}
-              </>
-            )}
+                    </React.Fragment>
+                  ))}
+                </>
+              )}
           </React.Fragment>
         ))}
       </Card>
-      {domain.events && (
+      {domain.events != null && domain.events?.length !== 0 && (
         <>
           <h2
             className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto"
@@ -317,7 +322,7 @@ async function Domain({
           </Card>
         </>
       )}
-      {domain.types && (
+      {domain.types != null && domain.types.length !== 0 && (
         <>
           <h2
             className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto"
