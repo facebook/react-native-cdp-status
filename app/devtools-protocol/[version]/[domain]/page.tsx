@@ -6,8 +6,7 @@ import {
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import React, { ReactNode } from 'react';
-import { remark } from 'remark';
-import html from 'remark-html';
+import { Markdown } from '@/ui/components/Markdown';
 
 export default async function Page({
   params: { version, domain: domainName },
@@ -395,11 +394,6 @@ function resolveMaybeQualifiedRef({
     return { domain: qualifiedDomain, localName };
   }
   return { domain, localName: $ref };
-}
-
-async function Markdown({ children }: { children: string }) {
-  const htmlString = await remark().use(html).process(children);
-  return <div dangerouslySetInnerHTML={{ __html: htmlString.toString() }} />;
 }
 
 function PropsTable({
