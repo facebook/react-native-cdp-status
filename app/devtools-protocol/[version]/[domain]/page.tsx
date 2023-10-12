@@ -291,6 +291,15 @@ async function Domain({
                 {'description' in type && type.description && (
                   <Markdown>{type.description}</Markdown>
                 )}
+                <p>
+                  Type:{' '}
+                  <TypeLink
+                    type={type as any}
+                    domain={domain.domain}
+                    versionSlug={versionSlug}
+                  />
+                </p>
+                <TypeDetail type={type as any} />
                 {'properties' in type && type.properties && (
                   <>
                     <h4 className="font-bold text-lg mt-4 mb-2">Properties</h4>
@@ -316,7 +325,11 @@ type Type =
       items: Type;
     }
   | {
-      type: 'boolean' | 'integer' | 'string' | 'number' | 'object' | 'any';
+      type: 'boolean' | 'integer' | 'number' | 'object' | 'any';
+    }
+  | {
+      type: 'string';
+      enum?: string[];
     }
   | {
       type?: undefined;
@@ -327,13 +340,18 @@ function TypeLink({
   type,
   domain,
   versionSlug,
+  failIfEnum,
 }: {
   type: Type | undefined;
   domain: string;
   versionSlug: string;
+  failIfEnum?: boolean;
 }) {
   if (!type) {
     return <></>;
+  }
+  if (failIfEnum && 'enum' in type && type.enum) {
+    throw new Error(`Unexpected enum in this context: ${JSON.stringify(type)}`);
   }
   switch (type.type) {
     case 'array':
@@ -344,6 +362,7 @@ function TypeLink({
             type={type.items}
             domain={domain}
             versionSlug={versionSlug}
+            failIfEnum
           />{' '}
           ]
         </code>
@@ -375,6 +394,42 @@ function TypeLink({
         </Link>
       );
     }
+    default: {
+      throw new Error(`Unhandled type: ${JSON.stringify(type)}`);
+    }
+  }
+}
+
+function TypeDetail({ type }: { type: Type }) {
+  if (!type) {
+    return <></>;
+  }
+  switch (type.type) {
+    case 'string':
+      if (type.enum) {
+        return (
+          <>
+            <p>
+              Allowed values:{' '}
+              {type.enum.map((value, index) => (
+                <React.Fragment key={value}>
+                  {index > 0 && ', '}
+                  <code className="font-mono">{value}</code>
+                </React.Fragment>
+              ))}
+            </p>
+          </>
+        );
+      }
+      return <></>;
+    case 'array':
+    case 'object':
+    case 'boolean':
+    case 'integer':
+    case 'number':
+    case 'any':
+    case undefined:
+      return <></>;
     default: {
       throw new Error(`Unhandled type: ${JSON.stringify(type)}`);
     }
@@ -430,6 +485,7 @@ function PropsTable({
               {'description' in item && item.description && (
                 <Markdown>{item.description}</Markdown>
               )}
+              <TypeDetail type={item} />
             </div>
           </div>
         </React.Fragment>
