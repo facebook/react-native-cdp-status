@@ -10,9 +10,12 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "devtools-protocol": "^0.0.1208070",
     "next": "13.5.4",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "remark": "^15.0.1",
+    "remark-html": "^16.0.1"
   },
   "devDependencies": {
     "@types/node": "^20",
