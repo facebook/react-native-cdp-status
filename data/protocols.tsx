@@ -10,7 +10,10 @@ import DevToolsBrowserProtocol from 'devtools-protocol/json/browser_protocol.jso
 import DevToolsJsProtocol from 'devtools-protocol/json/js_protocol.json';
 
 const totProtocol = {
-  domains: [...DevToolsBrowserProtocol.domains, ...DevToolsJsProtocol.domains],
+  domains: [
+    ...DevToolsBrowserProtocol.domains,
+    ...DevToolsJsProtocol.domains,
+  ].sort((a, b) => a.domain.localeCompare(b.domain)),
 };
 
 export type ProtocolDomain = (typeof totProtocol.domains)[number];
