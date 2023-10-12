@@ -29,13 +29,13 @@ export default async function Page({
     <div className="flex">
       <nav className="bg-gray-100 w-64 flex-shrink-0">
         <h2 className="font-bold text-lg p-4">Versions</h2>
-        <ul className="p-4 list-inside">
+        <ul className="p-0 list-inside">
           {Array.from(devToolsProtocolsByVersionSlug.values()).map(
             ({ metadata: { versionName, versionSlug } }) => (
-              <li key={versionSlug} className="mb-2 list-disc">
+              <li key={versionSlug} className="flex flex-col">
                 <Link
                   href={`/devtools-protocol/${versionSlug}`}
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline py-1 pl-8 hover:bg-stone-200"
                 >
                   {versionName}
                 </Link>
@@ -44,11 +44,17 @@ export default async function Page({
           )}
         </ul>
         <h2 className="font-bold text-lg p-4">Domains</h2>
-        <ul className="p-4">
+        <ul className="p-0">
           {protocol.protocol.domains.map((domain) => (
-            <li key={domain.domain} className="mb-2">
+            <li key={domain.domain} className="flex flex-col">
               <Link
-                className="text-blue-600 hover:underline"
+                className={`text-blue-600 hover:underline py-1 border-s-[16px] pl-4 hover:bg-stone-200 ${
+                  domain.experimental
+                    ? 'border-red-300'
+                    : 'deprecated' in domain && domain.deprecated
+                    ? 'border-orange-300'
+                    : 'border-transparent'
+                }`}
                 href={`/devtools-protocol/${encodeURIComponent(
                   version,
                 )}/${encodeURIComponent(domain.domain)}`}
@@ -77,10 +83,32 @@ function Card({ title, children }: { title?: string; children?: ReactNode }) {
 
 function Tag({ children }: { children: ReactNode }) {
   return (
-    <span className="bg-gray-200 rounded-lg px-2 py-1 text-sm text-gray-700">
+    <span className="bg-gray-200 rounded-lg px-2 py-1 text-sm text-gray-700 font-sans font-normal">
       {children}
     </span>
   );
+}
+
+function ExperimentalOrDeprecatedTag({
+  for: for_,
+}: {
+  for: { experimental?: boolean; deprecated?: boolean; [key: string]: any };
+}) {
+  if ('experimental' in for_ && for_.experimental) {
+    return (
+      <span className="bg-red-300 rounded-lg px-2 py-1 text-sm text-gray-700 font-sans font-normal">
+        Experimental
+      </span>
+    );
+  }
+  if ('deprecated' in for_ && for_.deprecated) {
+    return (
+      <span className="bg-orange-300 rounded-lg px-2 py-1 text-sm text-gray-700 font-sans font-normal">
+        Deprecated
+      </span>
+    );
+  }
+  return <></>;
 }
 
 async function Domain({
@@ -96,7 +124,7 @@ async function Domain({
         {'description' in domain && domain.description && (
           <Markdown>{domain.description}</Markdown>
         )}
-        {domain.experimental && <Tag>Experimental</Tag>}
+        <ExperimentalOrDeprecatedTag for={domain} />
         <h3 className="font-bold text-lg mt-4 mb-2">Methods</h3>
         <ul>
           {
@@ -108,13 +136,8 @@ async function Domain({
                   className="text-blue-600 hover:underline font-mono"
                 >
                   {domain.domain}.{command.name}
-                </Link>
-                {'experimental' in command && command.experimental && (
-                  <>
-                    {' '}
-                    <Tag>Experimental</Tag>
-                  </>
-                )}
+                </Link>{' '}
+                <ExperimentalOrDeprecatedTag for={command} />
               </li>
             ))
           }
@@ -132,13 +155,8 @@ async function Domain({
                       className="text-blue-600 hover:underline font-mono"
                     >
                       {domain.domain}.{event.name}
-                    </Link>
-                    {'experimental' in event && event.experimental && (
-                      <>
-                        {' '}
-                        <Tag>Experimental</Tag>
-                      </>
-                    )}
+                    </Link>{' '}
+                    <ExperimentalOrDeprecatedTag for={event} />
                   </li>
                 ))
               }
@@ -158,13 +176,8 @@ async function Domain({
                       className="text-blue-600 hover:underline font-mono"
                     >
                       {domain.domain}.{type.id}
-                    </Link>
-                    {'experimental' in type && type.experimental && (
-                      <>
-                        {' '}
-                        <Tag>Experimental</Tag>
-                      </>
-                    )}
+                    </Link>{' '}
+                    <ExperimentalOrDeprecatedTag for={type} />
                   </li>
                 ))
               }
@@ -187,13 +200,8 @@ async function Domain({
               className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
               id={`method-${encodeURIComponent(command.name)}`}
             >
-              {domain.domain}.{command.name}
-              {'experimental' in command && command.experimental && (
-                <>
-                  {' '}
-                  <Tag>Experimental</Tag>
-                </>
-              )}
+              {domain.domain}.{command.name}{' '}
+              <ExperimentalOrDeprecatedTag for={command} />
             </h3>
             {'description' in command && command.description && (
               <Markdown>{command.description}</Markdown>
@@ -279,13 +287,8 @@ async function Domain({
                   className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
                   id={`event-${encodeURIComponent(event.name)}`}
                 >
-                  {domain.domain}.{event.name}
-                  {'experimental' in event && event.experimental && (
-                    <>
-                      {' '}
-                      <Tag>Experimental</Tag>
-                    </>
-                  )}
+                  {domain.domain}.{event.name}{' '}
+                  <ExperimentalOrDeprecatedTag for={event} />
                 </h3>
                 {'description' in event && event.description && (
                   <Markdown>{event.description}</Markdown>
@@ -339,13 +342,8 @@ async function Domain({
                   className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
                   id={`type-${encodeURIComponent(type.id)}`}
                 >
-                  {domain.domain}.{type.id}
-                  {'experimental' in type && type.experimental && (
-                    <>
-                      {' '}
-                      <Tag>Experimental</Tag>
-                    </>
-                  )}
+                  {domain.domain}.{type.id}{' '}
+                  <ExperimentalOrDeprecatedTag for={type} />
                 </h3>
                 {'description' in type && type.description && (
                   <Markdown>{type.description}</Markdown>
