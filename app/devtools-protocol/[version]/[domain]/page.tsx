@@ -212,6 +212,7 @@ async function Domain({
                       </div>
                       <div className="w-1/4">
                         <TypeLink
+                          domain={domain.domain}
                           type={parameter as any}
                           versionSlug={versionSlug}
                         />
@@ -238,6 +239,7 @@ async function Domain({
                       </div>
                       <div className="w-1/4">
                         <TypeLink
+                          domain={domain.domain}
                           type={prop as any}
                           versionSlug={versionSlug}
                         />
@@ -265,11 +267,11 @@ type Type =
       items: Type;
     }
   | {
-      type: 'boolean' | 'integer' | 'string' | 'number';
+      type: 'boolean' | 'integer' | 'string' | 'number' | 'any';
     }
   | {
       type: 'object';
-      properties: {};
+      properties?: {};
     }
   | {
       type?: void;
@@ -278,9 +280,11 @@ type Type =
 
 function TypeLink({
   type,
+  domain,
   versionSlug,
 }: {
   type: Type | void;
+  domain: string;
   versionSlug: string;
 }) {
   if (!type) {
@@ -290,25 +294,39 @@ function TypeLink({
     case 'array':
       return (
         <code className="font-mono">
-          array[ <TypeLink type={type.items} versionSlug={versionSlug} /> ]
+          array[{' '}
+          <TypeLink
+            type={type.items}
+            domain={domain}
+            versionSlug={versionSlug}
+          />{' '}
+          ]
         </code>
       );
+    case 'object':
+      if (!type.properties) {
+        return <code className="font-mono">{type.type}</code>;
+      }
+      throw new Error(`Unhandled type: ${JSON.stringify(type)}`);
     case 'boolean':
     case 'integer':
     case 'string':
     case 'number':
+    case 'any':
       return <code className="font-mono">{type.type}</code>;
 
     case undefined: {
       const { $ref } = type;
-      const [domain, ...rest] = $ref.split('.');
-      const typeName = rest.join('.');
+      const { domain: resolvedDomain, localName } = resolveMaybeQualifiedRef({
+        $ref,
+        domain,
+      });
       return (
         <Link
           href={`/devtools-protocol/${encodeURIComponent(
             versionSlug,
-          )}/${encodeURIComponent(domain)}#type-${encodeURIComponent(
-            typeName,
+          )}/${encodeURIComponent(resolvedDomain)}#type-${encodeURIComponent(
+            localName,
           )}`}
           className="text-blue-600 hover:underline font-mono"
         >
@@ -320,6 +338,21 @@ function TypeLink({
       throw new Error(`Unhandled type: ${JSON.stringify(type)}`);
     }
   }
+}
+
+function resolveMaybeQualifiedRef({
+  $ref,
+  domain,
+}: {
+  $ref: string;
+  domain: string;
+}) {
+  if ($ref.includes('.')) {
+    const [qualifiedDomain, ...rest] = $ref.split('.');
+    const localName = rest.join('.');
+    return { domain: qualifiedDomain, localName };
+  }
+  return { domain, localName: $ref };
 }
 
 async function Markdown({ children }: { children: string }) {
