@@ -257,6 +257,125 @@ async function Domain({
           </React.Fragment>
         ))}
       </Card>
+      {domain.events && (
+        <>
+          <h2
+            className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto"
+            id="events"
+          >
+            Events
+          </h2>
+          <Card>
+            {domain.events.map((event, index) => (
+              <React.Fragment key={event.name}>
+                {/* add horizontal separator if not the first item */}
+                {index > 0 && <hr className="my-4" />}
+                <h3
+                  className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
+                  id={`event-${encodeURIComponent(event.name)}`}
+                >
+                  {domain.domain}.{event.name}
+                  {'experimental' in event && event.experimental && (
+                    <>
+                      {' '}
+                      <Tag>Experimental</Tag>
+                    </>
+                  )}
+                </h3>
+                {'description' in event && event.description && (
+                  <Markdown>{event.description}</Markdown>
+                )}
+                {'parameters' in event && event.parameters && (
+                  <>
+                    <h4 className="font-bold text-lg mt-4 mb-2">Parameters</h4>
+                    {event.parameters.map((parameter) => (
+                      <React.Fragment key={parameter.name}>
+                        <div className="flex flex-row">
+                          <div className="w-1/4">
+                            <code className="font-mono">{parameter.name}</code>
+                          </div>
+                          <div className="w-1/4">
+                            <TypeLink
+                              type={parameter as any}
+                              domain={domain.domain}
+                              versionSlug={versionSlug}
+                            />
+                          </div>
+                          <div className="w-2/4">
+                            {'description' in parameter &&
+                              parameter.description && (
+                                <Markdown>{parameter.description}</Markdown>
+                              )}
+                          </div>
+                        </div>
+                      </React.Fragment>
+                    ))}
+                  </>
+                )}
+              </React.Fragment>
+            ))}
+          </Card>
+        </>
+      )}
+      {domain.types && (
+        <>
+          <h2
+            className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto"
+            id="types"
+          >
+            Types
+          </h2>
+          <Card>
+            {domain.types.map((type, index) => (
+              <React.Fragment key={type.id}>
+                {/* add horizontal separator if not the first item */}
+                {index > 0 && <hr className="my-4" />}
+                <h3
+                  className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
+                  id={`type-${encodeURIComponent(type.id)}`}
+                >
+                  {domain.domain}.{type.id}
+                  {'experimental' in type && type.experimental && (
+                    <>
+                      {' '}
+                      <Tag>Experimental</Tag>
+                    </>
+                  )}
+                </h3>
+                {'description' in type && type.description && (
+                  <Markdown>{type.description}</Markdown>
+                )}
+                {'properties' in type && type.properties && (
+                  <>
+                    <h4 className="font-bold text-lg mt-4 mb-2">Properties</h4>
+                    {type.properties.map((prop) => (
+                      <React.Fragment key={prop.name}>
+                        <div className="flex flex-row">
+                          <div className="w-1/4">
+                            <code className="font-mono">{prop.name}</code>
+                          </div>
+                          <div className="w-1/4">
+                            <TypeLink
+                              type={prop as any}
+                              domain={domain.domain}
+                              versionSlug={versionSlug}
+                            />
+                          </div>
+                          <div className="w-2/4">
+                            {'description' in prop && prop.description && (
+                              <Markdown>{prop.description}</Markdown>
+                            )}
+                          </div>
+                        </div>
+                      </React.Fragment>
+                    ))}
+                  </>
+                )}
+              </React.Fragment>
+            ))}
+          </Card>
+        </>
+      )}
     </>
   );
 }
