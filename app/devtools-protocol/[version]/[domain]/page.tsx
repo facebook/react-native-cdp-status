@@ -7,7 +7,7 @@ import { remark } from 'remark';
 import html from 'remark-html';
 
 export default async function Page({
-  params: { version, domain },
+  params: { version, domain: domainName },
 }: {
   params: {
     version: string;
@@ -16,6 +16,10 @@ export default async function Page({
 }) {
   const protocol = devToolsProtocolsByVersionSlug.get(version);
   if (!protocol) {
+    return notFound();
+  }
+  const domain = protocol.protocol.domains.find((d) => d.domain === domainName);
+  if (!domain) {
     return notFound();
   }
   return (
@@ -53,12 +57,7 @@ export default async function Page({
         </ul>
       </nav>
       <main className="p-4 flex-grow">
-        {
-          <Domain
-            domain={protocol.protocol.domains.find((d) => d.domain === domain)!}
-            versionSlug={version}
-          />
-        }
+        {<Domain domain={domain} versionSlug={version} />}
       </main>
     </div>
   );
