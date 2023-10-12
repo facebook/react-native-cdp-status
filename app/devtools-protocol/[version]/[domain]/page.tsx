@@ -2,11 +2,18 @@ import DevToolsBrowserProtocol from 'devtools-protocol/json/browser_protocol.jso
 import { devToolsProtocolsByVersionSlug } from '@/data/protocols';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { remark } from 'remark';
 import html from 'remark-html';
 
-export default async function Page({ params: { version, domain } }) {
+export default async function Page({
+  params: { version, domain },
+}: {
+  params: {
+    version: string;
+    domain: string;
+  };
+}) {
   const protocol = devToolsProtocolsByVersionSlug.get(version);
   if (!protocol) {
     return notFound();
@@ -66,7 +73,7 @@ function Card({ title, children }: { title?: string; children?: ReactNode }) {
   );
 }
 
-function Tag({ children }) {
+function Tag({ children }: { children: ReactNode }) {
   return (
     <span className="bg-gray-200 rounded-lg px-2 py-1 text-sm text-gray-700">
       {children}
@@ -205,7 +212,10 @@ async function Domain({
                         )}{' '}
                       </div>
                       <div className="w-1/4">
-                        <TypeLink type={parameter} versionSlug={versionSlug} />
+                        <TypeLink
+                          type={parameter as any}
+                          versionSlug={versionSlug}
+                        />
                       </div>
                       <div className="w-2/4">
                         {'description' in parameter &&
@@ -228,7 +238,10 @@ async function Domain({
                         <code className="font-mono">{prop.name}</code>
                       </div>
                       <div className="w-1/4">
-                        <TypeLink type={prop} versionSlug={versionSlug} />
+                        <TypeLink
+                          type={prop as any}
+                          versionSlug={versionSlug}
+                        />
                       </div>
                       <div className="w-3/4">
                         {'description' in prop && prop.description && (
