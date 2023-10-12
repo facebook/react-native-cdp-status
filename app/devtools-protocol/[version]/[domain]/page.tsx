@@ -461,6 +461,8 @@ function PropsTable({
       name: string;
       optional?: boolean;
       description?: string;
+      experimental?: boolean;
+      deprecated?: boolean;
     } & Type
   >;
   domain: string;
@@ -486,6 +488,7 @@ function PropsTable({
                 <Markdown>{item.description}</Markdown>
               )}
               <TypeDetail type={item} />
+              <ExperimentalOrDeprecatedTag for={item} />
             </div>
           </div>
         </React.Fragment>
