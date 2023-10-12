@@ -88,26 +88,25 @@ function Tag({ children }: { children: ReactNode }) {
   );
 }
 
-function ExperimentalOrDeprecatedTag({
+function FeatureStatusTags({
   for: for_,
 }: {
   for: { experimental?: boolean; deprecated?: boolean; [key: string]: any };
 }) {
-  if ('experimental' in for_ && for_.experimental) {
-    return (
-      <span className="bg-red-300 rounded-lg px-2 py-1 text-sm text-gray-700 font-sans font-normal">
-        Experimental
-      </span>
-    );
-  }
-  if ('deprecated' in for_ && for_.deprecated) {
-    return (
-      <span className="bg-orange-300 rounded-lg px-2 py-1 text-sm text-gray-700 font-sans font-normal">
-        Deprecated
-      </span>
-    );
-  }
-  return <></>;
+  return (
+    <>
+      {'experimental' in for_ && for_.experimental && (
+        <span className="bg-red-300 rounded-lg px-2 py-1 text-sm text-gray-700 font-sans font-normal">
+          Experimental
+        </span>
+      )}
+      {'deprecated' in for_ && for_.deprecated && (
+        <span className="bg-orange-300 rounded-lg px-2 py-1 text-sm text-gray-700 font-sans font-normal">
+          Deprecated
+        </span>
+      )}
+    </>
+  );
 }
 
 async function Domain({
@@ -123,7 +122,7 @@ async function Domain({
         {'description' in domain && domain.description && (
           <Markdown>{domain.description}</Markdown>
         )}
-        <ExperimentalOrDeprecatedTag for={domain} />
+        <FeatureStatusTags for={domain} />
         <h3 className="font-bold text-lg mt-4 mb-2">Methods</h3>
         <ul>
           {
@@ -136,7 +135,7 @@ async function Domain({
                 >
                   {domain.domain}.{command.name}
                 </Link>{' '}
-                <ExperimentalOrDeprecatedTag for={command} />
+                <FeatureStatusTags for={command} />
               </li>
             ))
           }
@@ -155,7 +154,7 @@ async function Domain({
                     >
                       {domain.domain}.{event.name}
                     </Link>{' '}
-                    <ExperimentalOrDeprecatedTag for={event} />
+                    <FeatureStatusTags for={event} />
                   </li>
                 ))
               }
@@ -176,7 +175,7 @@ async function Domain({
                     >
                       {domain.domain}.{type.id}
                     </Link>{' '}
-                    <ExperimentalOrDeprecatedTag for={type} />
+                    <FeatureStatusTags for={type} />
                   </li>
                 ))
               }
@@ -199,8 +198,7 @@ async function Domain({
               className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
               id={`method-${encodeURIComponent(command.name)}`}
             >
-              {domain.domain}.{command.name}{' '}
-              <ExperimentalOrDeprecatedTag for={command} />
+              {domain.domain}.{command.name} <FeatureStatusTags for={command} />
             </h3>
             {'description' in command && command.description && (
               <Markdown>{command.description}</Markdown>
@@ -247,8 +245,7 @@ async function Domain({
                   className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
                   id={`event-${encodeURIComponent(event.name)}`}
                 >
-                  {domain.domain}.{event.name}{' '}
-                  <ExperimentalOrDeprecatedTag for={event} />
+                  {domain.domain}.{event.name} <FeatureStatusTags for={event} />
                 </h3>
                 {'description' in event && event.description && (
                   <Markdown>{event.description}</Markdown>
@@ -285,8 +282,7 @@ async function Domain({
                   className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
                   id={`type-${encodeURIComponent(type.id)}`}
                 >
-                  {domain.domain}.{type.id}{' '}
-                  <ExperimentalOrDeprecatedTag for={type} />
+                  {domain.domain}.{type.id} <FeatureStatusTags for={type} />
                 </h3>
                 {'description' in type && type.description && (
                   <Markdown>{type.description}</Markdown>
@@ -488,7 +484,7 @@ function PropsTable({
                 <Markdown>{item.description}</Markdown>
               )}
               <TypeDetail type={item} />
-              <ExperimentalOrDeprecatedTag for={item} />
+              <FeatureStatusTags for={item} />
             </div>
           </div>
         </React.Fragment>
