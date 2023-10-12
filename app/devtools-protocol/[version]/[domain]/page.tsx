@@ -209,34 +209,11 @@ async function Domain({
             {'parameters' in command && command.parameters && (
               <>
                 <h4 className="font-bold text-lg mt-4 mb-2">Parameters</h4>
-                {command.parameters.map((parameter) => (
-                  <React.Fragment key={parameter.name}>
-                    <div className="flex flex-row">
-                      <div className="w-1/4">
-                        <code className="font-mono">{parameter.name}</code>
-                        {'optional' in parameter && parameter.optional && (
-                          <>
-                            {' '}
-                            <Tag>Optional</Tag>
-                          </>
-                        )}{' '}
-                      </div>
-                      <div className="w-1/4">
-                        <TypeLink
-                          domain={domain.domain}
-                          type={parameter as any}
-                          versionSlug={versionSlug}
-                        />
-                      </div>
-                      <div className="w-2/4">
-                        {'description' in parameter &&
-                          parameter.description && (
-                            <Markdown>{parameter.description}</Markdown>
-                          )}
-                      </div>
-                    </div>
-                  </React.Fragment>
-                ))}
+                <PropsTable
+                  items={command.parameters as any}
+                  domain={domain.domain}
+                  versionSlug={versionSlug}
+                />
               </>
             )}
             {'returns' in command &&
@@ -244,27 +221,11 @@ async function Domain({
               command.returns.length !== 0 && (
                 <>
                   <h4 className="font-bold text-lg mt-4 mb-2">Return object</h4>
-                  {command.returns.map((prop) => (
-                    <React.Fragment key={prop.name}>
-                      <div className="flex flex-row">
-                        <div className="w-1/4">
-                          <code className="font-mono">{prop.name}</code>
-                        </div>
-                        <div className="w-1/4">
-                          <TypeLink
-                            domain={domain.domain}
-                            type={prop as any}
-                            versionSlug={versionSlug}
-                          />
-                        </div>
-                        <div className="w-3/4">
-                          {'description' in prop && prop.description && (
-                            <Markdown>{prop.description}</Markdown>
-                          )}
-                        </div>
-                      </div>
-                    </React.Fragment>
-                  ))}
+                  <PropsTable
+                    items={command.returns as any}
+                    domain={domain.domain}
+                    versionSlug={versionSlug}
+                  />
                 </>
               )}
           </React.Fragment>
@@ -296,28 +257,11 @@ async function Domain({
                 {'parameters' in event && event.parameters && (
                   <>
                     <h4 className="font-bold text-lg mt-4 mb-2">Parameters</h4>
-                    {event.parameters.map((parameter) => (
-                      <React.Fragment key={parameter.name}>
-                        <div className="flex flex-row">
-                          <div className="w-1/4">
-                            <code className="font-mono">{parameter.name}</code>
-                          </div>
-                          <div className="w-1/4">
-                            <TypeLink
-                              type={parameter as any}
-                              domain={domain.domain}
-                              versionSlug={versionSlug}
-                            />
-                          </div>
-                          <div className="w-2/4">
-                            {'description' in parameter &&
-                              parameter.description && (
-                                <Markdown>{parameter.description}</Markdown>
-                              )}
-                          </div>
-                        </div>
-                      </React.Fragment>
-                    ))}
+                    <PropsTable
+                      items={event.parameters as any}
+                      domain={domain.domain}
+                      versionSlug={versionSlug}
+                    />
                   </>
                 )}
               </React.Fragment>
@@ -351,27 +295,11 @@ async function Domain({
                 {'properties' in type && type.properties && (
                   <>
                     <h4 className="font-bold text-lg mt-4 mb-2">Properties</h4>
-                    {type.properties.map((prop) => (
-                      <React.Fragment key={prop.name}>
-                        <div className="flex flex-row">
-                          <div className="w-1/4">
-                            <code className="font-mono">{prop.name}</code>
-                          </div>
-                          <div className="w-1/4">
-                            <TypeLink
-                              type={prop as any}
-                              domain={domain.domain}
-                              versionSlug={versionSlug}
-                            />
-                          </div>
-                          <div className="w-2/4">
-                            {'description' in prop && prop.description && (
-                              <Markdown>{prop.description}</Markdown>
-                            )}
-                          </div>
-                        </div>
-                      </React.Fragment>
-                    ))}
+                    <PropsTable
+                      items={type.properties as any}
+                      domain={domain.domain}
+                      versionSlug={versionSlug}
+                    />
                   </>
                 )}
               </React.Fragment>
@@ -389,14 +317,10 @@ type Type =
       items: Type;
     }
   | {
-      type: 'boolean' | 'integer' | 'string' | 'number' | 'any';
+      type: 'boolean' | 'integer' | 'string' | 'number' | 'object' | 'any';
     }
   | {
-      type: 'object';
-      properties?: {};
-    }
-  | {
-      type?: void;
+      type?: undefined;
       $ref: string;
     };
 
@@ -405,7 +329,7 @@ function TypeLink({
   domain,
   versionSlug,
 }: {
-  type: Type | void;
+  type: Type | undefined;
   domain: string;
   versionSlug: string;
 }) {
@@ -415,7 +339,7 @@ function TypeLink({
   switch (type.type) {
     case 'array':
       return (
-        <code className="font-mono">
+        <code className="font-mono font-bold">
           array[{' '}
           <TypeLink
             type={type.items}
@@ -426,16 +350,12 @@ function TypeLink({
         </code>
       );
     case 'object':
-      if (!type.properties) {
-        return <code className="font-mono">{type.type}</code>;
-      }
-      throw new Error(`Unhandled type: ${JSON.stringify(type)}`);
     case 'boolean':
     case 'integer':
     case 'string':
     case 'number':
     case 'any':
-      return <code className="font-mono">{type.type}</code>;
+      return <code className="font-mono font-bold">{type.type}</code>;
 
     case undefined: {
       const { $ref } = type;
@@ -450,7 +370,7 @@ function TypeLink({
           )}/${encodeURIComponent(resolvedDomain)}#type-${encodeURIComponent(
             localName,
           )}`}
-          className="text-blue-600 hover:underline font-mono"
+          className="text-blue-600 hover:underline font-mono font-bold"
         >
           {$ref}
         </Link>
@@ -480,6 +400,48 @@ function resolveMaybeQualifiedRef({
 async function Markdown({ children }: { children: string }) {
   const htmlString = await remark().use(html).process(children);
   return <div dangerouslySetInnerHTML={{ __html: htmlString.toString() }} />;
+}
+
+function PropsTable({
+  items,
+  domain,
+  versionSlug,
+}: {
+  items: Array<
+    {
+      name: string;
+      optional?: boolean;
+      description?: string;
+    } & Type
+  >;
+  domain: string;
+  versionSlug: string;
+}) {
+  return (
+    <>
+      {items.map((item) => (
+        <React.Fragment key={item.name}>
+          <div className="flex flex-row">
+            <div className="w-2/5 text-end me-4 mb-4">
+              <code className="font-mono">{item.name}</code>
+              {'optional' in item && item.optional && (
+                <>
+                  <br />
+                  <Tag>Optional</Tag>
+                </>
+              )}{' '}
+            </div>
+            <div className="w-3/5 mb-4">
+              <TypeLink domain={domain} type={item} versionSlug={versionSlug} />
+              {'description' in item && item.description && (
+                <Markdown>{item.description}</Markdown>
+              )}
+            </div>
+          </div>
+        </React.Fragment>
+      ))}
+    </>
+  );
 }
 
 export async function generateStaticParams() {

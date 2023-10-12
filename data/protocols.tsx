@@ -14,7 +14,7 @@ const totProtocol = {
     ...DevToolsBrowserProtocol.domains,
     ...DevToolsJsProtocol.domains,
   ].sort((a, b) => a.domain.localeCompare(b.domain)),
-};
+} as const;
 
 export type ProtocolDomain = (typeof totProtocol.domains)[number];
 
