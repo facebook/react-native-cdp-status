@@ -1,7 +1,4 @@
-import {
-  ProtocolMetadata,
-  devToolsProtocolsByVersionSlug,
-} from '@/data/protocols';
+import { ProtocolMetadata, protocolVersionsModel } from '@/data/protocols';
 import { Card } from '@/ui/components/Card';
 import {
   ProtocolImplementationData,
@@ -12,6 +9,7 @@ import { ProtocolModel, parseQualifiedRef } from '@/data/ProtocolModel';
 import { useMemo } from 'react';
 import Image from 'next/image';
 import { Markdown } from '@/ui/components/Markdown';
+import { notFound } from 'next/navigation';
 
 export default async function Page({
   params: { version },
@@ -20,27 +18,31 @@ export default async function Page({
     version: string;
   };
 }) {
-  const protocol = devToolsProtocolsByVersionSlug.get(version)!;
-  const resolvedProtocol = await (typeof protocol.protocol === 'function'
-    ? protocol.protocol()
-    : protocol.protocol);
-  const protocolImplementationData =
-    await getProtocolImplementationData(resolvedProtocol);
+  const protocolVersion =
+    await protocolVersionsModel.protocolVersionBySlug(version);
+  if (!protocolVersion) {
+    return notFound();
+  }
+  const protocol = await protocolVersion.protocol();
+  const metadata = await protocolVersion.metadata();
+  const protocolImplementationData = await getProtocolImplementationData(
+    protocol.protocol,
+  );
 
   return (
     <main className="p-4 flex-grow">
       <Card
-        title={'Protocol version ' + protocol.metadata.versionName}
+        title={'Protocol version ' + metadata.versionName}
         topContent={
-          <ProtocolVersionExternalLinks protocolMetadata={protocol.metadata} />
+          <ProtocolVersionExternalLinks protocolMetadata={metadata} />
         }
       >
-        <Markdown>{protocol.metadata.description}</Markdown>
-        <p className="text-xs">{protocol.metadata.dataSourceDescription}</p>
+        <Markdown>{metadata.description}</Markdown>
+        <p className="text-xs">{metadata.dataSourceDescription}</p>
         <ImplementationStatsHeader />
         <ImplementationStats
           implementationId="hermes"
-          protocol={resolvedProtocol}
+          protocol={protocol.protocol}
           protocolImplementationData={protocolImplementationData}
         />
       </Card>
@@ -228,9 +230,12 @@ function ImplementationLink({
 
 export async function generateStaticParams() {
   const params = [];
-  for (const protocol of Array.from(devToolsProtocolsByVersionSlug.values())) {
+  for (const protocol of Array.from(
+    await protocolVersionsModel.protocolVersions(),
+  )) {
+    const { versionSlug } = await protocol.metadata();
     params.push({
-      version: protocol.metadata.versionSlug,
+      version: versionSlug,
     });
   }
   return params;

@@ -16,6 +16,7 @@ import DevToolsProtocolPackage from 'devtools-protocol/package.json';
 import { ReactNode } from 'react';
 import { Markdown } from '@/ui/components/Markdown';
 import { NpmPackageVersionLink } from './components/NpmPackageVersionLink';
+import { ProtocolModel } from './ProtocolModel';
 
 const totProtocol: IProtocol = {
   ...DevToolsBrowserProtocol,
@@ -81,87 +82,162 @@ export type ProtocolMetadata = {
   isAvailableUpstream: boolean;
 };
 
-const devToolsProtocolsByVersionSlug: ReadonlyMap<
-  string,
-  Readonly<{
-    protocol: IProtocol | (() => Promise<IProtocol>);
-    metadata: ProtocolMetadata;
-  }>
-> = new Map([
-  [
-    'tot',
-    {
-      protocol: totProtocol,
-      metadata: {
-        description: '',
-        versionName: 'latest (tip-of-tree)',
-        versionSlug: 'tot',
-        dataSourceDescription,
-        isAvailableUpstream: true,
-      },
-    },
-  ],
-  [
-    'v8',
-    {
-      protocol: DevToolsJsProtocol as IProtocol,
-      metadata: {
-        description: '',
-        versionName: 'v8-inspector (node)',
-        versionSlug: 'v8',
-        dataSourceDescription,
-        isAvailableUpstream: true,
-      },
-    },
-  ],
-  [
-    `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
-    {
-      protocol: {
-        ...totProtocol,
-        domains: totProtocol.domains.filter(isNotExperimentalOrDeprecated).map(
-          (domain) =>
-            ({
-              ...domain,
-              commands: domain.commands?.filter(isNotExperimentalOrDeprecated),
-              events:
-                domain.events?.filter(isNotExperimentalOrDeprecated) ?? [],
-              types: domain.types?.filter(isNotExperimentalOrDeprecated) ?? [],
-              // TODO: filter out command params, too? per https://github.com/ChromeDevTools/debugger-protocol-viewer/blob/85935f731864d54fa60d67548d2fd9862ef4014d/make-stable-protocol.js#L28C15-L28C22
-            }) as ProtocolDomain,
-        ),
-      },
-      metadata: {
-        description: '',
-        versionName: `stable RC (${DevToolsBrowserProtocol.version.major}.${DevToolsBrowserProtocol.version.minor})`,
-        versionSlug: `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
-        dataSourceDescription,
-        isAvailableUpstream: true,
-      },
-    },
-  ],
-  [
-    'hermes',
-    {
-      protocol: async () => {
-        return await new HermesImplementationModel().filterProtocol(
-          totProtocol,
-        );
-      },
-      metadata: {
-        description: `
+type ProtocolVersion = Readonly<{
+  protocol: IProtocol | (() => Promise<IProtocol>);
+  metadata: ProtocolMetadata;
+}>;
+
+export class ProtocolVersionsModel {
+  #devToolsProtocolsByVersionSlug: ReadonlyMap<string, ProtocolVersion>;
+
+  constructor() {
+    this.#devToolsProtocolsByVersionSlug = new Map([
+      [
+        'tot',
+        {
+          protocol: totProtocol,
+          metadata: {
+            description: '',
+            versionName: 'latest (tip-of-tree)',
+            versionSlug: 'tot',
+            dataSourceDescription,
+            isAvailableUpstream: true,
+          },
+        },
+      ],
+      [
+        'v8',
+        {
+          protocol: DevToolsJsProtocol as IProtocol,
+          metadata: {
+            description: '',
+            versionName: 'v8-inspector (node)',
+            versionSlug: 'v8',
+            dataSourceDescription,
+            isAvailableUpstream: true,
+          },
+        },
+      ],
+      [
+        `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
+        {
+          protocol: {
+            ...totProtocol,
+            domains: totProtocol.domains
+              .filter(isNotExperimentalOrDeprecated)
+              .map(
+                (domain) =>
+                  ({
+                    ...domain,
+                    commands: domain.commands?.filter(
+                      isNotExperimentalOrDeprecated,
+                    ),
+                    events:
+                      domain.events?.filter(isNotExperimentalOrDeprecated) ??
+                      [],
+                    types:
+                      domain.types?.filter(isNotExperimentalOrDeprecated) ?? [],
+                    // TODO: filter out command params, too? per https://github.com/ChromeDevTools/debugger-protocol-viewer/blob/85935f731864d54fa60d67548d2fd9862ef4014d/make-stable-protocol.js#L28C15-L28C22
+                  }) as ProtocolDomain,
+              ),
+          },
+          metadata: {
+            description: '',
+            versionName: `stable RC (${DevToolsBrowserProtocol.version.major}.${DevToolsBrowserProtocol.version.minor})`,
+            versionSlug: `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
+            dataSourceDescription,
+            isAvailableUpstream: true,
+          },
+        },
+      ],
+      [
+        'hermes',
+        {
+          protocol: async () => {
+            return await new HermesImplementationModel().filterProtocol(
+              totProtocol,
+            );
+          },
+          metadata: {
+            description: `
 NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatically to include only:
   * Protocol messages currently implemented in Hermes.
   * Protocol types referenced transitively by those messages - including types that might not be implemented/referenced in the Hermes code.
 `,
-        versionName: 'hermes',
-        versionSlug: 'hermes',
-        dataSourceDescription,
-        isAvailableUpstream: false,
-      },
-    },
-  ],
-  // TODO: add data for stable (1.2)?
-]);
+            versionName: 'hermes',
+            versionSlug: 'hermes',
+            dataSourceDescription,
+            isAvailableUpstream: false,
+          },
+        },
+      ],
+      // TODO: add data for stable (1.2)?
+    ]);
+  }
 
-export { devToolsProtocolsByVersionSlug };
+  #protocolVersionBySlug = new Map<string, ProtocolVersionModel>();
+
+  async protocolVersionBySlug(versionSlug: string) {
+    if (this.#protocolVersionBySlug.has(versionSlug)) {
+      return this.#protocolVersionBySlug.get(versionSlug)!;
+    }
+    const protocolVersion =
+      this.#devToolsProtocolsByVersionSlug.get(versionSlug);
+    if (!protocolVersion) {
+      return null;
+    }
+
+    const model = new ProtocolVersionModel(protocolVersion);
+    this.#protocolVersionBySlug.set(versionSlug, model);
+    return model;
+  }
+
+  async protocolVersionBySlugEnforcing(versionSlug: string) {
+    const protocolVersion = await this.protocolVersionBySlug(versionSlug);
+    if (!protocolVersion) {
+      throw new Error(`No protocol version ${versionSlug}`);
+    }
+    return protocolVersion;
+  }
+
+  async protocolVersions() {
+    return Promise.all(
+      Array.from(this.#devToolsProtocolsByVersionSlug.keys()).map(
+        (versionSlug) => this.protocolVersionBySlugEnforcing(versionSlug),
+      ),
+    );
+  }
+}
+
+export class ProtocolVersionModel {
+  protocolVersion: ProtocolVersion;
+
+  constructor(protocolVersion: ProtocolVersion) {
+    this.protocolVersion = protocolVersion;
+  }
+
+  #protocol = null as null | Promise<ProtocolModel>;
+
+  async protocol() {
+    if (this.#protocol) {
+      return await this.#protocol;
+    }
+    this.#protocol = Promise.resolve(
+      typeof this.protocolVersion.protocol === 'function'
+        ? this.protocolVersion.protocol()
+        : this.protocolVersion.protocol,
+    ).then((protocol) => new ProtocolModel(protocol));
+    try {
+      return await this.#protocol;
+    } catch (e) {
+      this.#protocol = null;
+      throw e;
+    }
+  }
+
+  async metadata() {
+    return this.protocolVersion.metadata;
+  }
+}
+
+export const protocolVersionsModel = new ProtocolVersionsModel();

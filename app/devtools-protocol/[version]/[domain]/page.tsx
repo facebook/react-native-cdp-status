@@ -1,18 +1,17 @@
 import {
   ProtocolDomain,
   ProtocolMetadata,
-  devToolsProtocolsByVersionSlug,
+  protocolVersionsModel,
 } from '@/data/protocols';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode } from 'react';
 import { Markdown } from '@/ui/components/Markdown';
 import { CopyableAnchor } from '@/ui/components/CopyableAnchor';
 import { DimText } from '@/ui/components/DimText';
 import Image from 'next/image';
-import { implementationModelsById } from '@/data/implementations';
 import { Protocol } from '@/third-party/protocol-schema';
-import { ProtocolModel, resolveMaybeQualifiedRef } from '@/data/ProtocolModel';
+import { resolveMaybeQualifiedRef } from '@/data/ProtocolModel';
 import {
   ProtocolImplementationData,
   getProtocolImplementationData,
@@ -28,27 +27,27 @@ export default async function Page({
     domain: string;
   };
 }) {
-  const protocol = devToolsProtocolsByVersionSlug.get(version);
-  if (!protocol) {
+  const protocolVersion =
+    await protocolVersionsModel.protocolVersionBySlug(version);
+  if (!protocolVersion) {
     return notFound();
   }
-  const resolvedProtocol = await (typeof protocol.protocol === 'function'
-    ? protocol.protocol()
-    : protocol.protocol);
-  const protocolModel = new ProtocolModel(resolvedProtocol);
-  const domain = protocolModel.domain(domainName);
+  const protocol = await protocolVersion.protocol();
+  const domain = protocol.domain(domainName);
   if (!domain) {
     return notFound();
   }
-  const protocolImplementationData =
-    await getProtocolImplementationData(resolvedProtocol);
+  const protocolImplementationData = await getProtocolImplementationData(
+    protocol.protocol,
+  );
+  const protocolMetadata = await protocolVersion.metadata();
   return (
     <main className="p-4 flex-grow">
       {
         <Domain
           domain={domain}
           protocolImplementationData={protocolImplementationData}
-          protocolMetadata={protocol.metadata}
+          protocolMetadata={protocolMetadata}
         />
       }
     </main>
@@ -686,13 +685,14 @@ function MethodReturnObject({
 
 export async function generateStaticParams() {
   const params = [];
-  for (const protocol of Array.from(devToolsProtocolsByVersionSlug.values())) {
-    const resolvedProtocol = await (typeof protocol.protocol === 'function'
-      ? protocol.protocol()
-      : protocol.protocol);
-    for (const domain of resolvedProtocol.domains) {
+  for (const protocolVersion of Array.from(
+    await protocolVersionsModel.protocolVersions(),
+  )) {
+    const { domains } = (await protocolVersion.protocol()).protocol;
+    const { versionSlug } = await protocolVersion.metadata();
+    for (const domain of domains) {
       params.push({
-        version: protocol.metadata.versionSlug,
+        version: versionSlug,
         domain: domain.domain,
       });
     }

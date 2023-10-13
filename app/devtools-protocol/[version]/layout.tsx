@@ -1,4 +1,4 @@
-import { devToolsProtocolsByVersionSlug } from '@/data/protocols';
+import { protocolVersionsModel } from '@/data/protocols';
 import { ExternalLink } from '@/ui/components/ExternalLink';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -12,35 +12,39 @@ export default async function Layout({
   };
   children: React.ReactNode;
 }) {
-  const protocol = devToolsProtocolsByVersionSlug.get(version);
-  if (!protocol) {
+  const protocolVersion =
+    await protocolVersionsModel.protocolVersionBySlug(version);
+  if (!protocolVersion) {
     return notFound();
   }
-  const resolvedProtocol = await (typeof protocol.protocol === 'function'
-    ? protocol.protocol()
-    : protocol.protocol);
+  const protocolVersions = await protocolVersionsModel.protocolVersions();
+  const protocol = await protocolVersion.protocol();
   return (
     <div>
       <div className="flex">
         <nav className="bg-gray-100 dark:bg-gray-900 w-64 flex-shrink-0">
           <h2 className="font-bold text-lg p-4">Versions</h2>
           <ul className="p-0 list-inside">
-            {Array.from(devToolsProtocolsByVersionSlug.values()).map(
-              ({ metadata: { versionName, versionSlug } }) => (
-                <li key={versionSlug} className="flex flex-col">
-                  <Link
-                    href={`/devtools-protocol/${versionSlug}`}
-                    className="text-blue-600 hover:underline py-1 pl-8 hover:bg-stone-200"
-                  >
-                    {versionName}
-                  </Link>
-                </li>
-              ),
+            {await Promise.all(
+              protocolVersions.map(async (protocolVersion) => {
+                const { versionName, versionSlug } =
+                  await protocolVersion.metadata();
+                return (
+                  <li key={versionSlug} className="flex flex-col">
+                    <Link
+                      href={`/devtools-protocol/${versionSlug}`}
+                      className="text-blue-600 hover:underline py-1 pl-8 hover:bg-stone-200"
+                    >
+                      {versionName}
+                    </Link>
+                  </li>
+                );
+              }),
             )}
           </ul>
           <h2 className="font-bold text-lg p-4">Domains</h2>
           <ul className="p-0">
-            {resolvedProtocol.domains.map((domain) => (
+            {protocol.protocol.domains.map((domain) => (
               <li key={domain.domain} className="flex flex-col">
                 <Link
                   className={`text-blue-600 hover:underline py-1 border-s-[16px] pl-4 hover:bg-stone-200 ${
