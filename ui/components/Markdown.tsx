@@ -8,7 +8,7 @@ export async function Markdown({ children }: { children: string }) {
   const htmlString = await remark().use(html).process(children);
   return (
     <div
-      className={styles.markdown}
+      className={`${styles.markdown} mb-1`}
       dangerouslySetInnerHTML={{ __html: htmlString.toString() }}
     />
   );

@@ -62,6 +62,7 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
   Readonly<{
     protocol: IProtocol | (() => Promise<IProtocol>);
     metadata: {
+      description: string;
       versionName: string;
       versionSlug: string;
     };
@@ -71,14 +72,22 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
     'tot',
     {
       protocol: totProtocol,
-      metadata: { versionName: 'latest (tip-of-tree)', versionSlug: 'tot' },
+      metadata: {
+        description: '',
+        versionName: 'latest (tip-of-tree)',
+        versionSlug: 'tot',
+      },
     },
   ],
   [
     'v8',
     {
       protocol: DevToolsJsProtocol as IProtocol,
-      metadata: { versionName: 'v8-inspector (node)', versionSlug: 'v8' },
+      metadata: {
+        description: '',
+        versionName: 'v8-inspector (node)',
+        versionSlug: 'v8',
+      },
     },
   ],
   [
@@ -99,6 +108,7 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
         ),
       },
       metadata: {
+        description: '',
         versionName: `stable RC (${DevToolsBrowserProtocol.version.major}.${DevToolsBrowserProtocol.version.minor})`,
         versionSlug: `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
       },
@@ -113,6 +123,11 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
         );
       },
       metadata: {
+        description: `
+NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatically to include only:
+  * Protocol messages currently implemented in Hermes.
+  * Protocol types referenced transitively by those messages - including types that might not be implemented/referenced in the Hermes code.
+`,
         versionName: 'hermes',
         versionSlug: 'hermes',
       },
