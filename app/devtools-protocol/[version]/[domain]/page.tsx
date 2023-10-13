@@ -622,7 +622,7 @@ function ImplementationLinkForMember({
           width={small ? 20 : 24}
           height={small ? 20 : 24}
           alt="Hermes"
-          title="Implemented in Hermes CDPHandler"
+          title="Referenced in Hermes CDPHandler"
           className="inline-block"
         />
       ) : (
