@@ -7,28 +7,12 @@
  * https://github.com/ChromeDevTools/debugger-protocol-viewer/blob/85935f731864d54fa60d67548d2fd9862ef4014d/pages/domainGenerator.js
  */
 
-import DevToolsBrowserProtocol from 'devtools-protocol/json/browser_protocol.json';
-import DevToolsJsProtocol from 'devtools-protocol/json/js_protocol.json';
 import { Protocol, IProtocol } from '@/third-party/protocol-schema';
 import { HermesImplementationModel } from './HermesImplementationModel';
 
-import DevToolsProtocolPackage from 'devtools-protocol/package.json';
 import { ReactNode } from 'react';
-import { Markdown } from '@/ui/components/Markdown';
-import { NpmPackageVersionLink } from './components/NpmPackageVersionLink';
+import { GitHubCommitLink } from '../ui/components/GitHubCommitLink';
 import { ProtocolModel } from './ProtocolModel';
-
-const totProtocol: IProtocol = {
-  ...DevToolsBrowserProtocol,
-  domains: (
-    [
-      ...DevToolsBrowserProtocol.domains,
-      ...DevToolsJsProtocol.domains,
-    ] as ProtocolDomain[]
-  )
-    .map(sortDomainMembers)
-    .sort((a, b) => a.domain.localeCompare(b.domain)),
-} as const;
 
 export type ProtocolDomain = Protocol.Domain;
 
@@ -63,17 +47,6 @@ function sortDomainMembers(domain: ProtocolDomain): ProtocolDomain {
 const isNotExperimentalOrDeprecated = (item: Protocol.Feature) =>
   !item.experimental && !item.deprecated;
 
-const dataSourceDescription = (
-  <>
-    Protocol data is from{' '}
-    <NpmPackageVersionLink
-      name={DevToolsProtocolPackage.name}
-      version={DevToolsProtocolPackage.version}
-    />
-    .
-  </>
-);
-
 export type ProtocolMetadata = {
   description: string;
   versionName: string;
@@ -87,102 +60,217 @@ type ProtocolVersion = Readonly<{
   metadata: ProtocolMetadata;
 }>;
 
-export class ProtocolVersionsModel {
-  #devToolsProtocolsByVersionSlug: ReadonlyMap<string, ProtocolVersion>;
+const DEVTOOLS_PROTOCOL_REPO_OWNER = 'ChromeDevTools';
+const DEVTOOLS_PROTOCOL_REPO_NAME = 'devtools-protocol';
+const DEVTOOLS_PROTOCOL_REPO_BRANCH = 'master';
 
-  constructor() {
-    this.#devToolsProtocolsByVersionSlug = new Map([
-      [
-        'tot',
-        {
-          protocol: totProtocol,
-          metadata: {
-            description: '',
-            versionName: 'latest (tip-of-tree)',
-            versionSlug: 'tot',
-            dataSourceDescription,
-            isAvailableUpstream: true,
+export class ProtocolVersionsModel {
+  #devToolsProtocolsByVersionSlug:
+    | ReadonlyMap<string, ProtocolVersion>
+    | undefined;
+
+  #devToolsProtocolRepoFetchMetadata: {
+    commitSha: string;
+  } | null = null;
+
+  #loadDataPromise = null as null | Promise<void>;
+
+  async #loadData() {
+    if (this.#loadDataPromise) {
+      return await this.#loadDataPromise;
+    }
+    this.#loadDataPromise = (async () => {
+      {
+        const res = await fetch(
+          `https://api.github.com/repos/${encodeURIComponent(
+            DEVTOOLS_PROTOCOL_REPO_OWNER,
+          )}/${encodeURIComponent(
+            DEVTOOLS_PROTOCOL_REPO_NAME,
+          )}/branches/${encodeURIComponent(DEVTOOLS_PROTOCOL_REPO_BRANCH)}`,
+          {
+            next: {
+              revalidate: 3 * 3600, // 3 hours
+            },
           },
-        },
-      ],
-      [
-        'v8',
-        {
-          protocol: DevToolsJsProtocol as IProtocol,
-          metadata: {
-            description: '',
-            versionName: 'v8-inspector (node)',
-            versionSlug: 'v8',
-            dataSourceDescription,
-            isAvailableUpstream: true,
+        );
+        if (!res.ok) {
+          throw new Error(res.statusText);
+        }
+        const data = await res.json();
+        const latestCommitSha = data.commit.sha;
+        this.#devToolsProtocolRepoFetchMetadata = {
+          commitSha: latestCommitSha,
+        };
+      }
+      let devToolsBrowserProtocol, devToolsJsProtocol;
+      {
+        const res = await fetch(
+          `https://raw.githubusercontent.com/${encodeURIComponent(
+            DEVTOOLS_PROTOCOL_REPO_OWNER,
+          )}/${encodeURIComponent(
+            DEVTOOLS_PROTOCOL_REPO_NAME,
+          )}/${encodeURIComponent(
+            this.#devToolsProtocolRepoFetchMetadata.commitSha,
+          )}/json/browser_protocol.json`,
+          {
+            next: {
+              tags: ['ProtocolVersionsModel'],
+            },
           },
-        },
-      ],
-      [
-        `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
-        {
-          protocol: {
-            ...totProtocol,
-            domains: totProtocol.domains
-              .filter(isNotExperimentalOrDeprecated)
-              .map(
-                (domain) =>
-                  ({
-                    ...domain,
-                    commands: domain.commands?.filter(
-                      isNotExperimentalOrDeprecated,
-                    ),
-                    events:
-                      domain.events?.filter(isNotExperimentalOrDeprecated) ??
-                      [],
-                    types:
-                      domain.types?.filter(isNotExperimentalOrDeprecated) ?? [],
-                    // TODO: filter out command params, too? per https://github.com/ChromeDevTools/debugger-protocol-viewer/blob/85935f731864d54fa60d67548d2fd9862ef4014d/make-stable-protocol.js#L28C15-L28C22
-                  }) as ProtocolDomain,
-              ),
+        );
+        if (!res.ok) {
+          throw new Error(res.statusText);
+        }
+        devToolsBrowserProtocol = await res.json();
+      }
+      {
+        const res = await fetch(
+          `https://raw.githubusercontent.com/${encodeURIComponent(
+            DEVTOOLS_PROTOCOL_REPO_OWNER,
+          )}/${encodeURIComponent(
+            DEVTOOLS_PROTOCOL_REPO_NAME,
+          )}/${encodeURIComponent(
+            this.#devToolsProtocolRepoFetchMetadata.commitSha,
+          )}/json/js_protocol.json`,
+          {
+            next: {
+              tags: ['ProtocolVersionsModel'],
+            },
           },
-          metadata: {
-            description: '',
-            versionName: `stable RC (${DevToolsBrowserProtocol.version.major}.${DevToolsBrowserProtocol.version.minor})`,
-            versionSlug: `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
-            dataSourceDescription,
-            isAvailableUpstream: true,
+        );
+        if (!res.ok) {
+          throw new Error(res.statusText);
+        }
+        devToolsJsProtocol = await res.json();
+      }
+
+      const totProtocol: IProtocol = {
+        ...devToolsBrowserProtocol,
+        domains: (
+          [
+            ...devToolsBrowserProtocol.domains,
+            ...devToolsJsProtocol.domains,
+          ] as ProtocolDomain[]
+        )
+          .map(sortDomainMembers)
+          .sort((a, b) => a.domain.localeCompare(b.domain)),
+      } as const;
+
+      const dataSourceDescription = (
+        <>
+          Protocol data is from{' '}
+          <GitHubCommitLink
+            owner={DEVTOOLS_PROTOCOL_REPO_OWNER}
+            repo={DEVTOOLS_PROTOCOL_REPO_NAME}
+            commitSha={this.#devToolsProtocolRepoFetchMetadata.commitSha}
+          />
+          .
+        </>
+      );
+
+      this.#devToolsProtocolsByVersionSlug = new Map([
+        [
+          'tot',
+          {
+            protocol: totProtocol,
+            metadata: {
+              description: '',
+              versionName: 'latest (tip-of-tree)',
+              versionSlug: 'tot',
+              dataSourceDescription,
+              isAvailableUpstream: true,
+            },
           },
-        },
-      ],
-      [
-        'hermes',
-        {
-          protocol: async () => {
-            return await new HermesImplementationModel().filterProtocol(
-              totProtocol,
-            );
+        ],
+        [
+          'v8',
+          {
+            protocol: devToolsJsProtocol as IProtocol,
+            metadata: {
+              description: '',
+              versionName: 'v8-inspector (node)',
+              versionSlug: 'v8',
+              dataSourceDescription,
+              isAvailableUpstream: true,
+            },
           },
-          metadata: {
-            description: `
+        ],
+        [
+          `${devToolsBrowserProtocol.version.major}-${devToolsBrowserProtocol.version.minor}`,
+          {
+            protocol: {
+              ...totProtocol,
+              domains: totProtocol.domains
+                .filter(isNotExperimentalOrDeprecated)
+                .map(
+                  (domain) =>
+                    ({
+                      ...domain,
+                      commands: domain.commands?.filter(
+                        isNotExperimentalOrDeprecated,
+                      ),
+                      events:
+                        domain.events?.filter(isNotExperimentalOrDeprecated) ??
+                        [],
+                      types:
+                        domain.types?.filter(isNotExperimentalOrDeprecated) ??
+                        [],
+                      // TODO: filter out command params, too? per https://github.com/ChromeDevTools/debugger-protocol-viewer/blob/85935f731864d54fa60d67548d2fd9862ef4014d/make-stable-protocol.js#L28C15-L28C22
+                    }) as ProtocolDomain,
+                ),
+            },
+            metadata: {
+              description: '',
+              versionName: `stable RC (${devToolsBrowserProtocol.version.major}.${devToolsBrowserProtocol.version.minor})`,
+              versionSlug: `${devToolsBrowserProtocol.version.major}-${devToolsBrowserProtocol.version.minor}`,
+              dataSourceDescription,
+              isAvailableUpstream: true,
+            },
+          },
+        ],
+        [
+          'hermes',
+          {
+            protocol: async () => {
+              return await new HermesImplementationModel().filterProtocol(
+                totProtocol,
+              );
+            },
+            metadata: {
+              description: `
 NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatically to include only:
-  * Protocol messages currently implemented in Hermes.
-  * Protocol types referenced transitively by those messages - including types that might not be implemented/referenced in the Hermes code.
-`,
-            versionName: 'hermes',
-            versionSlug: 'hermes',
-            dataSourceDescription,
-            isAvailableUpstream: false,
+* Protocol messages currently implemented in Hermes.
+* Protocol types referenced transitively by those messages - including types that might not be implemented/referenced in the Hermes code.
+  `,
+              versionName: 'hermes',
+              versionSlug: 'hermes',
+              dataSourceDescription,
+              isAvailableUpstream: false,
+            },
           },
-        },
-      ],
-      // TODO: add data for stable (1.2)?
-    ]);
+        ],
+        // TODO: add data for stable (1.2)?
+      ]);
+    })();
+    try {
+      return await this.#loadDataPromise;
+    } catch (e) {
+      this.#loadDataPromise = null;
+      throw e;
+    }
   }
+
+  constructor() {}
 
   #protocolVersionBySlug = new Map<string, ProtocolVersionModel>();
 
   async protocolVersionBySlug(versionSlug: string) {
+    await this.#loadData();
     if (this.#protocolVersionBySlug.has(versionSlug)) {
       return this.#protocolVersionBySlug.get(versionSlug)!;
     }
     const protocolVersion =
-      this.#devToolsProtocolsByVersionSlug.get(versionSlug);
+      this.#devToolsProtocolsByVersionSlug!.get(versionSlug);
     if (!protocolVersion) {
       return null;
     }
@@ -201,8 +289,9 @@ NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatic
   }
 
   async protocolVersions() {
+    await this.#loadData();
     return Promise.all(
-      Array.from(this.#devToolsProtocolsByVersionSlug.keys()).map(
+      Array.from(this.#devToolsProtocolsByVersionSlug!.keys()).map(
         (versionSlug) => this.protocolVersionBySlugEnforcing(versionSlug),
       ),
     );

@@ -10,7 +10,6 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "devtools-protocol": "^0.0.1208070",
     "escape-string-regexp": "^5.0.0",
     "next": "13.5.4",
     "npm-registry-fetch": "^16.1.0",
