@@ -1,17 +1,18 @@
 import {
   ProtocolDomain,
+  ProtocolMetadata,
   devToolsProtocolsByVersionSlug,
 } from '@/data/protocols';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { Markdown } from '@/ui/components/Markdown';
 import { CopyableAnchor } from '@/ui/components/CopyableAnchor';
 import { DimText } from '@/ui/components/DimText';
 import Image from 'next/image';
 import { implementationModelsById } from '@/data/implementations';
 import { Protocol } from '@/third-party/protocol-schema';
-import { resolveMaybeQualifiedRef } from '@/data/ProtocolModel';
+import { ProtocolModel, resolveMaybeQualifiedRef } from '@/data/ProtocolModel';
 import {
   ProtocolImplementationData,
   getProtocolImplementationData,
@@ -34,7 +35,8 @@ export default async function Page({
   const resolvedProtocol = await (typeof protocol.protocol === 'function'
     ? protocol.protocol()
     : protocol.protocol);
-  const domain = resolvedProtocol.domains.find((d) => d.domain === domainName);
+  const protocolModel = new ProtocolModel(resolvedProtocol);
+  const domain = protocolModel.domain(domainName);
   if (!domain) {
     return notFound();
   }
@@ -45,8 +47,8 @@ export default async function Page({
       {
         <Domain
           domain={domain}
-          versionSlug={version}
           protocolImplementationData={protocolImplementationData}
+          protocolMetadata={protocol.metadata}
         />
       }
     </main>
@@ -72,19 +74,19 @@ function FeatureStatusTags({ for: for_ }: { for: Protocol.Feature }) {
 
 async function Domain({
   domain,
-  versionSlug,
   protocolImplementationData,
+  protocolMetadata,
 }: {
   domain: ProtocolDomain;
-  versionSlug: string;
   protocolImplementationData: ProtocolImplementationData;
+  protocolMetadata: ProtocolMetadata;
 }) {
   return (
     <>
       <TocCard
         domain={domain}
-        versionSlug={versionSlug}
         protocolImplementationData={protocolImplementationData}
+        protocolMetadata={protocolMetadata}
       />
       {domain.commands != null && domain.commands?.length !== 0 && (
         <>
@@ -98,21 +100,21 @@ async function Domain({
                 {index > 0 && <hr className="my-4" />}
                 <MemberHeading
                   kind="method"
-                  versionSlug={versionSlug}
                   member={command}
                   domain={domain.domain}
                   protocolImplementationData={protocolImplementationData}
+                  protocolMetadata={protocolMetadata}
                 />
                 <MemberDescription member={command} />
                 <MemberParameters
                   member={command}
                   domain={domain.domain}
-                  versionSlug={versionSlug}
+                  versionSlug={protocolMetadata.versionSlug}
                 />
                 <MethodReturnObject
                   command={command}
                   domain={domain.domain}
-                  versionSlug={versionSlug}
+                  versionSlug={protocolMetadata.versionSlug}
                 />
               </div>
             ))}
@@ -131,16 +133,16 @@ async function Domain({
                 {index > 0 && <hr className="my-4" />}
                 <MemberHeading
                   kind="event"
-                  versionSlug={versionSlug}
                   member={event}
                   domain={domain.domain}
                   protocolImplementationData={protocolImplementationData}
+                  protocolMetadata={protocolMetadata}
                 />
                 <MemberDescription member={event} />
                 <MemberParameters
                   member={event}
                   domain={domain.domain}
-                  versionSlug={versionSlug}
+                  versionSlug={protocolMetadata.versionSlug}
                 />
               </div>
             ))}
@@ -159,10 +161,10 @@ async function Domain({
                 {index > 0 && <hr className="my-4" />}
                 <MemberHeading
                   kind="type"
-                  versionSlug={versionSlug}
                   member={type}
                   domain={domain.domain}
                   protocolImplementationData={protocolImplementationData}
+                  protocolMetadata={protocolMetadata}
                 />
                 <MemberDescription member={type} />
                 <p>
@@ -170,14 +172,14 @@ async function Domain({
                   <TypeLink
                     type={type}
                     domain={domain.domain}
-                    versionSlug={versionSlug}
+                    versionSlug={protocolMetadata.versionSlug}
                   />
                 </p>
                 <TypeDetail type={type} />
                 <TypeProperties
                   type={type}
                   domain={domain.domain}
-                  versionSlug={versionSlug}
+                  versionSlug={protocolMetadata.versionSlug}
                 />
               </div>
             ))}
@@ -190,18 +192,21 @@ async function Domain({
 
 function TocCard({
   domain,
-  versionSlug,
   protocolImplementationData,
+  protocolMetadata,
 }: {
   domain: ProtocolDomain;
-  versionSlug: string;
   protocolImplementationData: ProtocolImplementationData;
+  protocolMetadata: ProtocolMetadata;
 }) {
   return (
     <Card
       title={`${domain.domain} Domain`}
       topContent={
-        <DomainExternalLinks domain={domain.domain} versionSlug={versionSlug} />
+        <DomainExternalLinks
+          domain={domain.domain}
+          protocolMetadata={protocolMetadata}
+        />
       }
     >
       {'description' in domain && domain.description && (
@@ -436,8 +441,8 @@ function MemberHeading({
   kind,
   member,
   domain,
-  versionSlug,
   protocolImplementationData,
+  protocolMetadata,
 }: {
   kind: 'method' | 'event' | 'type';
   member: {
@@ -445,8 +450,8 @@ function MemberHeading({
     deprecated?: boolean;
   } & ({ name: string } | { id: string });
   domain: string;
-  versionSlug: string;
   protocolImplementationData: ProtocolImplementationData;
+  protocolMetadata: ProtocolMetadata;
 }) {
   const key = 'name' in member ? member.name : member.id;
   return (
@@ -455,8 +460,8 @@ function MemberHeading({
         kind={kind}
         memberKey={key}
         domain={domain}
-        versionSlug={versionSlug}
         protocolImplementationData={protocolImplementationData}
+        protocolMetadata={protocolMetadata}
       />
       <h3
         className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
@@ -472,13 +477,18 @@ function MemberHeading({
 
 function DomainExternalLinks({
   domain,
-  versionSlug,
+  protocolMetadata,
 }: {
   domain: string;
-  versionSlug: string;
+  protocolMetadata: ProtocolMetadata;
 }) {
+  const upstreamVersionSlug = protocolMetadata.isAvailableUpstream
+    ? protocolMetadata.versionSlug
+    : 'tot';
+  // TODO: Check against our local copy of the `tot` version to see if this particular domain is available.
+
   const cdpUrl = `https://chromedevtools.github.io/devtools-protocol/${encodeURIComponent(
-    versionSlug,
+    upstreamVersionSlug,
   )}/${encodeURIComponent(domain)}`;
   return (
     <div className="float-right">
@@ -539,22 +549,26 @@ function ImplementationLinkForMember({
 function MemberExternalLinks({
   kind,
   memberKey,
-  versionSlug,
   domain,
   protocolImplementationData,
+  protocolMetadata,
 }: {
   kind: 'method' | 'event' | 'type';
   memberKey: string;
-  versionSlug: string;
   domain: string;
   protocolImplementationData: ProtocolImplementationData;
+  protocolMetadata: ProtocolMetadata;
 }) {
+  const upstreamVersionSlug = protocolMetadata.isAvailableUpstream
+    ? protocolMetadata.versionSlug
+    : 'tot';
+  // TODO: Check against our local copy of the `tot` version to see if this particular member is available.
+
   const cdpUrl = `https://chromedevtools.github.io/devtools-protocol/${encodeURIComponent(
-    versionSlug,
+    upstreamVersionSlug,
   )}/${encodeURIComponent(domain)}#${encodeURIComponent(
     kind,
   )}-${encodeURIComponent(memberKey)}`;
-
   return (
     <div className="float-right flex-row gap-1 flex">
       <ImplementationLinkForMember

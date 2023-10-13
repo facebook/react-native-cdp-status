@@ -1,4 +1,7 @@
-import { devToolsProtocolsByVersionSlug } from '@/data/protocols';
+import {
+  ProtocolMetadata,
+  devToolsProtocolsByVersionSlug,
+} from '@/data/protocols';
 import { Card } from '@/ui/components/Card';
 import {
   ProtocolImplementationData,
@@ -26,7 +29,12 @@ export default async function Page({
 
   return (
     <main className="p-4 flex-grow">
-      <Card title={'Protocol version ' + protocol.metadata.versionName}>
+      <Card
+        title={'Protocol version ' + protocol.metadata.versionName}
+        topContent={
+          <ProtocolVersionExternalLinks protocolMetadata={protocol.metadata} />
+        }
+      >
         <Markdown>{protocol.metadata.description}</Markdown>
         <p className="text-xs">{protocol.metadata.dataSourceDescription}</p>
         <ImplementationStatsHeader />
@@ -37,6 +45,33 @@ export default async function Page({
         />
       </Card>
     </main>
+  );
+}
+
+function ProtocolVersionExternalLinks({
+  protocolMetadata,
+}: {
+  protocolMetadata: ProtocolMetadata;
+}) {
+  const cdpUrl = protocolMetadata.isAvailableUpstream
+    ? `https://chromedevtools.github.io/devtools-protocol/${encodeURIComponent(
+        protocolMetadata.versionSlug,
+      )}`
+    : null;
+  return (
+    <div className="float-right">
+      {cdpUrl && (
+        <a href={cdpUrl} target="cdp-reference" title="View in CDP docs">
+          <Image
+            src="/images/chrome-devtools-circle-responsive.svg"
+            width={24}
+            height={24}
+            alt="Chrome DevTools"
+            about=""
+          />
+        </a>
+      )}
+    </div>
   );
 }
 

@@ -2,43 +2,21 @@ import { IProtocol, Protocol } from '@/third-party/protocol-schema';
 
 export class ProtocolModel {
   readonly protocol: IProtocol;
-  readonly #domainsByName: ReadonlyMap<string, Protocol.Domain>;
-  readonly #commandsByQualifiedName = new Map<string, Protocol.Command>();
-  readonly #eventsByQualifiedName = new Map<string, Protocol.Event>();
-  readonly #typesByQualifiedId: ReadonlyMap<string, Protocol.ProtocolType>;
+  #domainsByName: ReadonlyMap<string, Protocol.Domain> | undefined;
+  #commandsByQualifiedName: ReadonlyMap<string, Protocol.Command> | undefined;
+  #eventsByQualifiedName: ReadonlyMap<string, Protocol.Event> | undefined;
+  #typesByQualifiedId: ReadonlyMap<string, Protocol.ProtocolType> | undefined;
 
   constructor(protocol: IProtocol) {
     this.protocol = protocol;
-    this.#domainsByName = new Map(
-      protocol.domains.map((domain) => [domain.domain, domain]),
-    );
-    this.#commandsByQualifiedName = new Map(
-      protocol.domains.flatMap((domain) =>
-        (domain.commands ?? []).map((command) => [
-          `${domain.domain}.${command.name}`,
-          command,
-        ]),
-      ),
-    );
-    this.#eventsByQualifiedName = new Map(
-      protocol.domains.flatMap((domain) =>
-        (domain.events ?? []).map((event) => [
-          `${domain.domain}.${event.name}`,
-          event,
-        ]),
-      ),
-    );
-    this.#typesByQualifiedId = new Map(
-      protocol.domains.flatMap((domain) =>
-        (domain.types ?? []).map((type) => [
-          `${domain.domain}.${type.id}`,
-          type,
-        ]),
-      ),
-    );
   }
 
   domain(domainName: string): Protocol.Domain | undefined {
+    if (!this.#domainsByName) {
+      this.#domainsByName = new Map(
+        this.protocol.domains.map((domain) => [domain.domain, domain]),
+      );
+    }
     return this.#domainsByName.get(domainName);
   }
 
@@ -57,6 +35,16 @@ export class ProtocolModel {
     domain: string;
     localName: string;
   }): Protocol.Command | undefined {
+    if (!this.#commandsByQualifiedName) {
+      this.#commandsByQualifiedName = new Map(
+        this.protocol.domains.flatMap((domain) =>
+          (domain.commands ?? []).map((command) => [
+            `${domain.domain}.${command.name}`,
+            command,
+          ]),
+        ),
+      );
+    }
     return this.#commandsByQualifiedName.get(`${domain}.${localName}`);
   }
 
@@ -81,6 +69,16 @@ export class ProtocolModel {
     domain: string;
     localName: string;
   }): Protocol.Event | undefined {
+    if (!this.#eventsByQualifiedName) {
+      this.#eventsByQualifiedName = new Map(
+        this.protocol.domains.flatMap((domain) =>
+          (domain.events ?? []).map((event) => [
+            `${domain.domain}.${event.name}`,
+            event,
+          ]),
+        ),
+      );
+    }
     return this.#eventsByQualifiedName.get(`${domain}.${localName}`);
   }
 
@@ -105,6 +103,16 @@ export class ProtocolModel {
     domain: string;
     localName: string;
   }): Protocol.ProtocolType | undefined {
+    if (!this.#typesByQualifiedId) {
+      this.#typesByQualifiedId = new Map(
+        this.protocol.domains.flatMap((domain) =>
+          (domain.types ?? []).map((type) => [
+            `${domain.domain}.${type.id}`,
+            type,
+          ]),
+        ),
+      );
+    }
     return this.#typesByQualifiedId.get(`${domain}.${localName}`);
   }
 

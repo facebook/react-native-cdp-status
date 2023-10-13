@@ -73,16 +73,19 @@ const dataSourceDescription = (
   </>
 );
 
+export type ProtocolMetadata = {
+  description: string;
+  versionName: string;
+  versionSlug: string;
+  dataSourceDescription: ReactNode;
+  isAvailableUpstream: boolean;
+};
+
 const devToolsProtocolsByVersionSlug: ReadonlyMap<
   string,
   Readonly<{
     protocol: IProtocol | (() => Promise<IProtocol>);
-    metadata: {
-      description: string;
-      versionName: string;
-      versionSlug: string;
-      dataSourceDescription: ReactNode;
-    };
+    metadata: ProtocolMetadata;
   }>
 > = new Map([
   [
@@ -94,6 +97,7 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
         versionName: 'latest (tip-of-tree)',
         versionSlug: 'tot',
         dataSourceDescription,
+        isAvailableUpstream: true,
       },
     },
   ],
@@ -106,6 +110,7 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
         versionName: 'v8-inspector (node)',
         versionSlug: 'v8',
         dataSourceDescription,
+        isAvailableUpstream: true,
       },
     },
   ],
@@ -131,6 +136,7 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
         versionName: `stable RC (${DevToolsBrowserProtocol.version.major}.${DevToolsBrowserProtocol.version.minor})`,
         versionSlug: `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
         dataSourceDescription,
+        isAvailableUpstream: true,
       },
     },
   ],
@@ -151,6 +157,7 @@ NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatic
         versionName: 'hermes',
         versionSlug: 'hermes',
         dataSourceDescription,
+        isAvailableUpstream: false,
       },
     },
   ],
