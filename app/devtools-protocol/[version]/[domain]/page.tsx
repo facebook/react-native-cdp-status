@@ -1,4 +1,3 @@
-import DevToolsBrowserProtocol from 'devtools-protocol/json/browser_protocol.json';
 import {
   ProtocolDomain,
   devToolsProtocolsByVersionSlug,
