@@ -16,10 +16,12 @@ const totProtocol = {
     .sort((a, b) => a.domain.localeCompare(b.domain)),
 } as const;
 
-export type ProtocolDomain = (
-  | typeof DevToolsJsProtocol
-  | typeof DevToolsBrowserProtocol
-)['domains'][number];
+export type Protocol = Pick<
+  typeof DevToolsJsProtocol | typeof DevToolsBrowserProtocol,
+  'domains'
+>;
+
+export type ProtocolDomain = Protocol['domains'][number];
 
 type DomainMemberBase = {
   experimental?: boolean;

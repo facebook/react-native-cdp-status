@@ -10,6 +10,17 @@ import { CopyableAnchor } from '@/ui/components/CopyableAnchor';
 import { DimText } from '@/ui/components/DimText';
 import Image from 'next/image';
 import { ExternalLink } from '@/ui/components/ExternalLink';
+import {
+  ImplementationProtocolReferences,
+  implementationModelsById,
+} from '@/data/implementations';
+
+type ProtocolImplementationData = {
+  referencesByImplementationId: ReadonlyMap<
+    string,
+    Readonly<{ references: ImplementationProtocolReferences }>
+  >;
+};
 
 export default async function Page({
   params: { version, domain: domainName },
@@ -27,6 +38,24 @@ export default async function Page({
   if (!domain) {
     return notFound();
   }
+  const referencesByImplementationId = new Map(
+    await Promise.all(
+      [...implementationModelsById.entries()].map(
+        async ([implementationId, implementationModel]) =>
+          [
+            implementationId,
+            {
+              references: await implementationModel.extractProtocolReferences(
+                protocol.protocol as any,
+              ),
+            },
+          ] as const,
+      ),
+    ),
+  );
+  const protocolImplementationData: ProtocolImplementationData = {
+    referencesByImplementationId,
+  };
   return (
     <div>
       <div className="flex">
@@ -69,7 +98,13 @@ export default async function Page({
           </ul>
         </nav>
         <main className="p-4 flex-grow">
-          {<Domain domain={domain} versionSlug={version} />}
+          {
+            <Domain
+              domain={domain}
+              versionSlug={version}
+              protocolImplementationData={protocolImplementationData}
+            />
+          }
         </main>
       </div>
       <footer className="bg-gray-100 text-gray-600 text-sm p-4 flex-shrink-0">
@@ -136,13 +171,19 @@ function FeatureStatusTags({
 async function Domain({
   domain,
   versionSlug,
+  protocolImplementationData,
 }: {
   domain: ProtocolDomain;
   versionSlug: string;
+  protocolImplementationData: ProtocolImplementationData;
 }) {
   return (
     <>
-      <TocCard domain={domain} versionSlug={versionSlug} />
+      <TocCard
+        domain={domain}
+        versionSlug={versionSlug}
+        protocolImplementationData={protocolImplementationData}
+      />
       <h2 className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto">Methods</h2>
       <Card>
         {domain.commands.map((command, index) => (
@@ -154,6 +195,7 @@ async function Domain({
               versionSlug={versionSlug}
               member={command}
               domain={domain.domain}
+              protocolImplementationData={protocolImplementationData}
             />
             <MemberDescription member={command} />
             <MemberParameters
@@ -184,6 +226,7 @@ async function Domain({
                   versionSlug={versionSlug}
                   member={event}
                   domain={domain.domain}
+                  protocolImplementationData={protocolImplementationData}
                 />
                 <MemberDescription member={event} />
                 <MemberParameters
@@ -211,6 +254,7 @@ async function Domain({
                   versionSlug={versionSlug}
                   member={type}
                   domain={domain.domain}
+                  protocolImplementationData={protocolImplementationData}
                 />
                 <MemberDescription member={type} />
                 <p>
@@ -256,9 +300,11 @@ type Type =
 function TocCard({
   domain,
   versionSlug,
+  protocolImplementationData,
 }: {
   domain: ProtocolDomain;
   versionSlug: string;
+  protocolImplementationData: ProtocolImplementationData;
 }) {
   return (
     <Card
@@ -275,13 +321,24 @@ function TocCard({
         kind="method"
         members={domain.commands}
         domain={domain.domain}
+        protocolImplementationData={protocolImplementationData}
       >
         Methods
       </MemberLinks>
-      <MemberLinks kind="event" members={domain.events} domain={domain.domain}>
+      <MemberLinks
+        kind="event"
+        members={domain.events}
+        domain={domain.domain}
+        protocolImplementationData={protocolImplementationData}
+      >
         Events
       </MemberLinks>
-      <MemberLinks kind="type" members={domain.types} domain={domain.domain}>
+      <MemberLinks
+        kind="type"
+        members={domain.types}
+        domain={domain.domain}
+        protocolImplementationData={protocolImplementationData}
+      >
         Types
       </MemberLinks>
     </Card>
@@ -454,6 +511,7 @@ function MemberLinks({
   members,
   domain,
   children,
+  protocolImplementationData,
 }: {
   kind: 'method' | 'event' | 'type';
   members:
@@ -466,6 +524,7 @@ function MemberLinks({
     | undefined;
   domain: string;
   children: ReactNode;
+  protocolImplementationData: ProtocolImplementationData;
 }) {
   return (
     members != null &&
@@ -485,6 +544,14 @@ function MemberLinks({
                   {key}
                 </Link>{' '}
                 <FeatureStatusTags for={member} />
+                <ImplementationLinkForMember
+                  domain={domain}
+                  implementationId="hermes"
+                  kind={kind}
+                  memberKey={key}
+                  protocolImplementationData={protocolImplementationData}
+                  small
+                />
               </li>
             );
           })}
@@ -499,6 +566,7 @@ function MemberHeading({
   member,
   domain,
   versionSlug,
+  protocolImplementationData,
 }: {
   kind: 'method' | 'event' | 'type';
   member: {
@@ -507,6 +575,7 @@ function MemberHeading({
   } & ({ name: string } | { id: string });
   domain: string;
   versionSlug: string;
+  protocolImplementationData: ProtocolImplementationData;
 }) {
   const key = 'name' in member ? member.name : member.id;
   return (
@@ -516,6 +585,7 @@ function MemberHeading({
         memberKey={key}
         domain={domain}
         versionSlug={versionSlug}
+        protocolImplementationData={protocolImplementationData}
       />
       <h3
         className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
@@ -554,30 +624,82 @@ function DomainExternalLinks({
   );
 }
 
+function ImplementationLinkForMember({
+  implementationId,
+  kind,
+  domain,
+  memberKey,
+  protocolImplementationData,
+  small,
+}: {
+  implementationId: 'hermes';
+  kind: 'method' | 'event' | 'type';
+  domain: string;
+  memberKey: string;
+  protocolImplementationData: ProtocolImplementationData;
+  small?: boolean;
+}) {
+  const isImplemented =
+    (protocolImplementationData.referencesByImplementationId.get(
+      implementationId,
+    )?.references[
+      kind === 'type' ? 'types' : kind === 'method' ? 'commands' : 'events'
+    ]?.[domain + '.' + memberKey]?.length ?? 0) !== 0;
+  switch (implementationId) {
+    case 'hermes': {
+      return isImplemented ? (
+        <Image
+          src="/images/hermes-logo.svg"
+          width={small ? 20 : 24}
+          height={small ? 20 : 24}
+          alt="Hermes"
+          title="Implemented in Hermes CDPHandler"
+          className="inline-block"
+        />
+      ) : (
+        <></>
+      );
+    }
+    default:
+      throw new Error(`Unhandled implementationId: ${implementationId}`);
+  }
+}
+
 function MemberExternalLinks({
   kind,
   memberKey,
   versionSlug,
   domain,
+  protocolImplementationData,
 }: {
   kind: 'method' | 'event' | 'type';
   memberKey: string;
   versionSlug: string;
   domain: string;
+  protocolImplementationData: ProtocolImplementationData;
 }) {
   const cdpUrl = `https://chromedevtools.github.io/devtools-protocol/${encodeURIComponent(
     versionSlug,
   )}/${encodeURIComponent(domain)}#${encodeURIComponent(
     kind,
   )}-${encodeURIComponent(memberKey)}`;
+
   return (
-    <div className="float-right">
+    <div className="float-right flex-row gap-1 flex">
+      <ImplementationLinkForMember
+        domain={domain}
+        implementationId="hermes"
+        kind={kind}
+        memberKey={memberKey}
+        protocolImplementationData={protocolImplementationData}
+      />
       <a href={cdpUrl} target="cdp-reference" title="View in CDP docs">
         <Image
           src="/images/chrome-devtools-circle-responsive.svg"
           width={24}
           height={24}
           alt="Chrome DevTools"
+          className="inline-block"
         />
       </a>
     </div>
