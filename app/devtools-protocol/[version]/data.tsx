@@ -1,11 +1,15 @@
 import { ImplementationProtocolReferences } from '@/data/ImplementationModel';
 import { implementationModelsById } from '@/data/implementations';
 import { IProtocol } from '@/third-party/protocol-schema';
+import { ReactNode } from 'react';
 
 export type ProtocolImplementationData = {
   referencesByImplementationId: ReadonlyMap<
     string,
-    Readonly<{ references: ImplementationProtocolReferences }>
+    Readonly<{
+      references: ImplementationProtocolReferences;
+      dataSourceDescription: ReactNode;
+    }>
   >;
 };
 
@@ -26,6 +30,8 @@ export async function getProtocolImplementationData(
                 await implementationModel.extractProtocolReferences(
                   resolvedProtocol,
                 ),
+              dataSourceDescription:
+                await implementationModel.getDataSourceDescription(),
             },
           ] as const,
       ),

@@ -1,12 +1,18 @@
+import { GitHubCommitLink } from '@/ui/components/GitHubCommitLink';
 import {
   ImplementationModel,
   ImplementationModelBase,
   ImplementationProtocolReferences,
 } from './ImplementationModel';
 import { IProtocol } from '@/third-party/protocol-schema';
+import { ReactNode } from 'react';
 
 const CDP_HANDLER_CPP = 'API/hermes/inspector/chrome/CDPHandler.cpp';
 const MESSAGE_TYPES_H = 'API/hermes/inspector/chrome/MessageTypes.h';
+
+const HERMES_REPO_OWNER = 'facebook';
+const HERMES_REPO_NAME = 'hermes';
+const HERMES_REPO_BRANCH = 'main';
 
 export class HermesImplementationModel
   extends ImplementationModelBase
@@ -17,15 +23,24 @@ export class HermesImplementationModel
   }
 
   #files = new Map<string, string>();
+  #repoFetchMetadata: {
+    owner: string;
+    repo: string;
+    commitSha: string;
+  } | null = null;
   #fetchDataPromise: Promise<void> | undefined;
 
   async #fetchFile(path: string) {
     if (this.#files.has(path)) {
       return;
     }
+    const { owner, repo, commitSha } = this.#repoFetchMetadata!;
     const res = await fetch(
-      'https://raw.githubusercontent.com/facebook/hermes/main/' +
-        encodeURIComponent(path),
+      `https://raw.githubusercontent.com/${encodeURIComponent(
+        owner,
+      )}/${encodeURIComponent(repo)}/${encodeURIComponent(
+        commitSha,
+      )}/${encodeURIComponent(path)}`,
       {
         next: {
           revalidate: 3600, // 1 hour
@@ -46,6 +61,30 @@ export class HermesImplementationModel
     }
     this.#fetchDataPromise = (async () => {
       try {
+        {
+          const res = await fetch(
+            `https://api.github.com/repos/${encodeURIComponent(
+              HERMES_REPO_OWNER,
+            )}/${encodeURIComponent(
+              HERMES_REPO_NAME,
+            )}/branches/${encodeURIComponent(HERMES_REPO_BRANCH)}`,
+            {
+              next: {
+                revalidate: 3 * 3600, // 3 hours
+              },
+            },
+          );
+          if (!res.ok) {
+            throw new Error(res.statusText);
+          }
+          const data = await res.json();
+          const latestCommitSha = data.commit.sha;
+          this.#repoFetchMetadata = {
+            owner: HERMES_REPO_OWNER,
+            repo: HERMES_REPO_NAME,
+            commitSha: latestCommitSha,
+          };
+        }
         await Promise.all([
           this.#fetchFile(CDP_HANDLER_CPP),
           this.#fetchFile(MESSAGE_TYPES_H),
@@ -135,6 +174,17 @@ export class HermesImplementationModel
       }
     }
     return references;
+  }
+
+  async getDataSourceDescription() {
+    await this.#fetchData();
+    const { owner, repo, commitSha } = this.#repoFetchMetadata!;
+    return (
+      <>
+        Hermes data is from{' '}
+        <GitHubCommitLink commitSha={commitSha} owner={owner} repo={repo} />
+      </>
+    );
   }
 }
 

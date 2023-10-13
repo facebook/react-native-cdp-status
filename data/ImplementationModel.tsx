@@ -36,6 +36,7 @@ export interface ImplementationModel {
     protocol: IProtocol,
   ): Promise<ImplementationProtocolReferences>;
   filterProtocol(protocol: IProtocol): Promise<IProtocol>;
+  getDataSourceDescription(): Promise<JSX.Element>;
 }
 export abstract class ImplementationModelBase implements ImplementationModel {
   abstract extractProtocolReferences(
@@ -87,5 +88,9 @@ export abstract class ImplementationModelBase implements ImplementationModel {
         })),
       ] as const,
     });
+  }
+
+  getDataSourceDescription(): Promise<JSX.Element> {
+    return Promise.resolve(<></>);
   }
 }

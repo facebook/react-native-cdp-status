@@ -39,6 +39,13 @@ export default async function Page({
       >
         <Markdown>{metadata.description}</Markdown>
         <p className="text-xs">{metadata.dataSourceDescription}</p>
+        <p className="text-xs">
+          {
+            protocolImplementationData.referencesByImplementationId.get(
+              'hermes',
+            )!.dataSourceDescription
+          }
+        </p>
         <ImplementationStatsHeader />
         <ImplementationStats
           implementationId="hermes"
