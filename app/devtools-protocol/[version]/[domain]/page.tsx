@@ -120,129 +120,35 @@ async function Domain({
 }) {
   return (
     <>
-      <Card title={`${domain.domain} Domain`}>
-        {'description' in domain && domain.description && (
-          <Markdown>{domain.description}</Markdown>
-        )}
-        <FeatureStatusTags for={domain} />
-        <h3 className="font-bold text-lg mt-4 mb-2">Methods</h3>
-        <ul>
-          {
-            // Each method is a separate card on this page. Link to them using fragments.
-            domain.commands.map((command) => (
-              <li key={command.name}>
-                <Link
-                  href={`#method-${encodeURIComponent(command.name)}`}
-                  className="text-blue-600 hover:underline font-mono"
-                >
-                  <DimText>{domain.domain}.</DimText>
-                  {command.name}
-                </Link>{' '}
-                <FeatureStatusTags for={command} />
-              </li>
-            ))
-          }
-        </ul>
-        {(domain.events?.length ?? 0) !== 0 && (
-          <>
-            <h3 className="font-bold text-lg mt-4 mb-2">Events</h3>
-            <ul>
-              {
-                // Each event is a separate card on this page. Link to them using fragments.
-                domain.events!.map((event) => (
-                  <li key={event.name}>
-                    <Link
-                      href={`#event-${encodeURIComponent(event.name)}`}
-                      className="text-blue-600 hover:underline font-mono"
-                    >
-                      <DimText>{domain.domain}.</DimText>
-                      {event.name}
-                    </Link>{' '}
-                    <FeatureStatusTags for={event} />
-                  </li>
-                ))
-              }
-            </ul>
-          </>
-        )}
-        {(domain.types?.length ?? 0) !== 0 && (
-          <>
-            <h3 className="font-bold text-lg mt-4 mb-2">Types</h3>
-            <ul>
-              {
-                // Each type is a separate card on this page. Link to them using fragments.
-                domain.types!.map((type) => (
-                  <li key={type.id}>
-                    <Link
-                      href={`#type-${encodeURIComponent(type.id)}`}
-                      className="text-blue-600 hover:underline font-mono"
-                    >
-                      <DimText>{domain.domain}.</DimText>
-                      {type.id}
-                    </Link>{' '}
-                    <FeatureStatusTags for={type} />
-                  </li>
-                ))
-              }
-            </ul>
-          </>
-        )}
-      </Card>
-      <h2
-        className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto"
-        id="methods"
-      >
-        Methods
-      </h2>
+      <TocCard domain={domain} />
+      <h2 className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto">Methods</h2>
       <Card>
         {domain.commands.map((command, index) => (
           <div key={command.name} className="group">
             {/* add horizontal separator if not the first item */}
             {index > 0 && <hr className="my-4" />}
-            <h3
-              className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
-              id={`method-${encodeURIComponent(command.name)}`}
-            >
-              <DimText>{domain.domain}.</DimText>
-              {command.name} <FeatureStatusTags for={command} />
-              <CopyableAnchor
-                href={`#method-${encodeURIComponent(command.name)}`}
-              />
-            </h3>
-            {'description' in command && command.description && (
-              <Markdown>{command.description}</Markdown>
-            )}
-            {'parameters' in command && command.parameters && (
-              <>
-                <h4 className="font-bold text-lg mt-4 mb-2">Parameters</h4>
-                <PropsTable
-                  items={command.parameters as any}
-                  domain={domain.domain}
-                  versionSlug={versionSlug}
-                />
-              </>
-            )}
-            {'returns' in command &&
-              command.returns != null &&
-              command.returns.length !== 0 && (
-                <>
-                  <h4 className="font-bold text-lg mt-4 mb-2">Return object</h4>
-                  <PropsTable
-                    items={command.returns as any}
-                    domain={domain.domain}
-                    versionSlug={versionSlug}
-                  />
-                </>
-              )}
+            <MemberHeading
+              kind="method"
+              member={command}
+              domain={domain.domain}
+            />
+            <MemberDescription member={command} />
+            <MemberParameters
+              member={command as any}
+              domain={domain.domain}
+              versionSlug={versionSlug}
+            />
+            <MethodReturnObject
+              command={command as any}
+              domain={domain.domain}
+              versionSlug={versionSlug}
+            />
           </div>
         ))}
       </Card>
       {domain.events != null && domain.events?.length !== 0 && (
         <>
-          <h2
-            className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto"
-            id="events"
-          >
+          <h2 className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto">
             Events
           </h2>
           <Card>
@@ -250,29 +156,17 @@ async function Domain({
               <div key={event.name} className="group">
                 {/* add horizontal separator if not the first item */}
                 {index > 0 && <hr className="my-4" />}
-                <h3
-                  className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
-                  id={`event-${encodeURIComponent(event.name)}`}
-                >
-                  <DimText>{domain.domain}.</DimText>
-                  {event.name} <FeatureStatusTags for={event} />
-                  <CopyableAnchor
-                    href={`#event-${encodeURIComponent(event.name)}`}
-                  />
-                </h3>
-                {'description' in event && event.description && (
-                  <Markdown>{event.description}</Markdown>
-                )}
-                {'parameters' in event && event.parameters && (
-                  <>
-                    <h4 className="font-bold text-lg mt-4 mb-2">Parameters</h4>
-                    <PropsTable
-                      items={event.parameters as any}
-                      domain={domain.domain}
-                      versionSlug={versionSlug}
-                    />
-                  </>
-                )}
+                <MemberHeading
+                  kind="event"
+                  member={event}
+                  domain={domain.domain}
+                />
+                <MemberDescription member={event} />
+                <MemberParameters
+                  member={event as any}
+                  domain={domain.domain}
+                  versionSlug={versionSlug}
+                />
               </div>
             ))}
           </Card>
@@ -280,10 +174,7 @@ async function Domain({
       )}
       {domain.types != null && domain.types.length !== 0 && (
         <>
-          <h2
-            className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto"
-            id="types"
-          >
+          <h2 className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto">
             Types
           </h2>
           <Card>
@@ -291,19 +182,12 @@ async function Domain({
               <div key={type.id} className="group">
                 {/* add horizontal separator if not the first item */}
                 {index > 0 && <hr className="my-4" />}
-                <h3
-                  className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
-                  id={`type-${encodeURIComponent(type.id)}`}
-                >
-                  <DimText>{domain.domain}.</DimText>
-                  {type.id} <FeatureStatusTags for={type} />
-                  <CopyableAnchor
-                    href={`#type-${encodeURIComponent(type.id)}`}
-                  />
-                </h3>
-                {'description' in type && type.description && (
-                  <Markdown>{type.description}</Markdown>
-                )}
+                <MemberHeading
+                  kind="type"
+                  member={type}
+                  domain={domain.domain}
+                />
+                <MemberDescription member={type} />
                 <p>
                   Type:{' '}
                   <TypeLink
@@ -313,16 +197,11 @@ async function Domain({
                   />
                 </p>
                 <TypeDetail type={type as any} />
-                {'properties' in type && type.properties && (
-                  <>
-                    <h4 className="font-bold text-lg mt-4 mb-2">Properties</h4>
-                    <PropsTable
-                      items={type.properties as any}
-                      domain={domain.domain}
-                      versionSlug={versionSlug}
-                    />
-                  </>
-                )}
+                <TypeProperties
+                  type={type as any}
+                  domain={domain.domain}
+                  versionSlug={versionSlug}
+                />
               </div>
             ))}
           </Card>
@@ -348,6 +227,30 @@ type Type =
       type?: undefined;
       $ref: string;
     };
+
+function TocCard({ domain }: { domain: ProtocolDomain }) {
+  return (
+    <Card title={`${domain.domain} Domain`}>
+      {'description' in domain && domain.description && (
+        <Markdown>{domain.description}</Markdown>
+      )}
+      <FeatureStatusTags for={domain} />
+      <MemberLinks
+        kind="method"
+        members={domain.commands}
+        domain={domain.domain}
+      >
+        Methods
+      </MemberLinks>
+      <MemberLinks kind="event" members={domain.events} domain={domain.domain}>
+        Events
+      </MemberLinks>
+      <MemberLinks kind="type" members={domain.types} domain={domain.domain}>
+        Types
+      </MemberLinks>
+    </Card>
+  );
+}
 
 function TypeLink({
   type,
@@ -506,6 +409,203 @@ function PropsTable({
           </div>
         </React.Fragment>
       ))}
+    </>
+  );
+}
+
+function MemberLinks({
+  kind,
+  members,
+  domain,
+  children,
+}: {
+  kind: 'method' | 'event' | 'type';
+  members:
+    | Array<
+        {
+          experimental?: boolean;
+          deprecated?: boolean;
+        } & ({ name: string } | { id: string })
+      >
+    | undefined;
+  domain: string;
+  children: ReactNode;
+}) {
+  return (
+    members != null &&
+    members.length !== 0 && (
+      <>
+        <h3 className="font-bold text-lg mt-4 mb-2">{children}</h3>
+        <ul>
+          {members.map((member) => {
+            const key = 'name' in member ? member.name : member.id;
+            return (
+              <li key={key}>
+                <Link
+                  href={`#${kind}-${encodeURIComponent(key)}`}
+                  className="text-blue-600 hover:underline font-mono"
+                >
+                  <DimText>{domain}.</DimText>
+                  {key}
+                </Link>{' '}
+                <FeatureStatusTags for={member} />
+              </li>
+            );
+          })}
+        </ul>
+      </>
+    )
+  );
+}
+
+function MemberHeading({
+  kind,
+  member,
+  domain,
+}: {
+  kind: 'method' | 'event' | 'type';
+  member: {
+    experimental?: boolean;
+    deprecated?: boolean;
+  } & ({ name: string } | { id: string });
+  domain: string;
+}) {
+  const key = 'name' in member ? member.name : member.id;
+  return (
+    <h3
+      className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
+      id={`${kind}-${encodeURIComponent(key)}`}
+    >
+      <DimText>{domain}.</DimText>
+      {key} <FeatureStatusTags for={member} />
+      <CopyableAnchor href={`#${kind}-${encodeURIComponent(key)}`} />
+    </h3>
+  );
+}
+
+function MemberDescription({
+  member,
+}: {
+  member: {
+    description?: string;
+    [key: string]: unknown;
+  };
+}) {
+  return (
+    <>
+      {'description' in member && member.description && (
+        <Markdown>{member.description}</Markdown>
+      )}
+    </>
+  );
+}
+
+function MemberParameters({
+  member,
+  domain,
+  versionSlug,
+}: {
+  member: {
+    parameters?: Array<
+      {
+        name: string;
+        optional?: boolean;
+        description?: string;
+        experimental?: boolean;
+        deprecated?: boolean;
+      } & Type
+    >;
+    [key: string]: unknown;
+  };
+  domain: string;
+  versionSlug: string;
+}) {
+  return (
+    <>
+      {'parameters' in member && member.parameters && (
+        <>
+          <h4 className="font-bold text-lg mt-4 mb-2">Parameters</h4>
+          <PropsTable
+            items={member.parameters}
+            domain={domain}
+            versionSlug={versionSlug}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
+function TypeProperties({
+  type,
+  domain,
+  versionSlug,
+}: {
+  type: {
+    properties?: Array<
+      {
+        name: string;
+        optional?: boolean;
+        description?: string;
+        experimental?: boolean;
+        deprecated?: boolean;
+      } & Type
+    >;
+    [key: string]: unknown;
+  };
+  domain: string;
+  versionSlug: string;
+}) {
+  return (
+    <>
+      {'properties' in type && type.properties && (
+        <>
+          <h4 className="font-bold text-lg mt-4 mb-2">Properties</h4>
+          <PropsTable
+            items={type.properties}
+            domain={domain}
+            versionSlug={versionSlug}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
+function MethodReturnObject({
+  command,
+  domain,
+  versionSlug,
+}: {
+  command: {
+    returns?: Array<
+      {
+        name: string;
+        optional?: boolean;
+        description?: string;
+        experimental?: boolean;
+        deprecated?: boolean;
+      } & Type
+    >;
+    [key: string]: unknown;
+  };
+  domain: string;
+  versionSlug: string;
+}) {
+  return (
+    <>
+      {'returns' in command &&
+        command.returns != null &&
+        command.returns.length !== 0 && (
+          <>
+            <h4 className="font-bold text-lg mt-4 mb-2">Return object</h4>
+            <PropsTable
+              items={command.returns as any}
+              domain={domain}
+              versionSlug={versionSlug}
+            />
+          </>
+        )}
     </>
   );
 }
