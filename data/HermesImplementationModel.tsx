@@ -179,7 +179,7 @@ export class HermesImplementationModel
     return (
       <>
         Hermes data is from{' '}
-        <GitHubCommitLink commitSha={commitSha} owner={owner} repo={repo} />
+        <GitHubCommitLink commitSha={commitSha} owner={owner} repo={repo} />.
       </>
     );
   }
