@@ -9,6 +9,8 @@ import React, { ReactNode } from 'react';
 import { Markdown } from '@/ui/components/Markdown';
 import { CopyableAnchor } from '@/ui/components/CopyableAnchor';
 import { DimText } from '@/ui/components/DimText';
+import Image from 'next/image';
+import { ExternalLink } from '@/ui/components/ExternalLink';
 
 export default async function Page({
   params: { version, domain: domainName },
@@ -27,55 +29,76 @@ export default async function Page({
     return notFound();
   }
   return (
-    <div className="flex">
-      <nav className="bg-gray-100 w-64 flex-shrink-0">
-        <h2 className="font-bold text-lg p-4">Versions</h2>
-        <ul className="p-0 list-inside">
-          {Array.from(devToolsProtocolsByVersionSlug.values()).map(
-            ({ metadata: { versionName, versionSlug } }) => (
-              <li key={versionSlug} className="flex flex-col">
+    <div>
+      <div className="flex">
+        <nav className="bg-gray-100 w-64 flex-shrink-0">
+          <h2 className="font-bold text-lg p-4">Versions</h2>
+          <ul className="p-0 list-inside">
+            {Array.from(devToolsProtocolsByVersionSlug.values()).map(
+              ({ metadata: { versionName, versionSlug } }) => (
+                <li key={versionSlug} className="flex flex-col">
+                  <Link
+                    href={`/devtools-protocol/${versionSlug}`}
+                    className="text-blue-600 hover:underline py-1 pl-8 hover:bg-stone-200"
+                  >
+                    {versionName}
+                  </Link>
+                </li>
+              ),
+            )}
+          </ul>
+          <h2 className="font-bold text-lg p-4">Domains</h2>
+          <ul className="p-0">
+            {protocol.protocol.domains.map((domain) => (
+              <li key={domain.domain} className="flex flex-col">
                 <Link
-                  href={`/devtools-protocol/${versionSlug}`}
-                  className="text-blue-600 hover:underline py-1 pl-8 hover:bg-stone-200"
+                  className={`text-blue-600 hover:underline py-1 border-s-[16px] pl-4 hover:bg-stone-200 ${
+                    domain.experimental
+                      ? 'border-red-300'
+                      : 'deprecated' in domain && domain.deprecated
+                      ? 'border-orange-300'
+                      : 'border-transparent'
+                  }`}
+                  href={`/devtools-protocol/${encodeURIComponent(
+                    version,
+                  )}/${encodeURIComponent(domain.domain)}`}
                 >
-                  {versionName}
+                  {domain.domain}
                 </Link>
               </li>
-            ),
-          )}
-        </ul>
-        <h2 className="font-bold text-lg p-4">Domains</h2>
-        <ul className="p-0">
-          {protocol.protocol.domains.map((domain) => (
-            <li key={domain.domain} className="flex flex-col">
-              <Link
-                className={`text-blue-600 hover:underline py-1 border-s-[16px] pl-4 hover:bg-stone-200 ${
-                  domain.experimental
-                    ? 'border-red-300'
-                    : 'deprecated' in domain && domain.deprecated
-                    ? 'border-orange-300'
-                    : 'border-transparent'
-                }`}
-                href={`/devtools-protocol/${encodeURIComponent(
-                  version,
-                )}/${encodeURIComponent(domain.domain)}`}
-              >
-                {domain.domain}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <main className="p-4 flex-grow">
-        {<Domain domain={domain} versionSlug={version} />}
-      </main>
+            ))}
+          </ul>
+        </nav>
+        <main className="p-4 flex-grow">
+          {<Domain domain={domain} versionSlug={version} />}
+        </main>
+      </div>
+      <footer className="bg-gray-100 text-gray-600 text-sm p-4 flex-shrink-0">
+        <ExternalLink href="https://github.com/ChromeDevTools/devtools-logo">
+          Chrome DevTools logo
+        </ExternalLink>{' '}
+        used under a{' '}
+        <ExternalLink href="https://creativecommons.org/licenses/by/4.0/">
+          CC BY 4.0
+        </ExternalLink>{' '}
+        license.
+      </footer>
     </div>
   );
 }
 
-function Card({ title, children }: { title?: string; children?: ReactNode }) {
+function Card({
+  title,
+  children,
+  topContent,
+}: {
+  title?: string;
+  children?: ReactNode;
+  topContent?: ReactNode;
+}) {
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 my-4 max-w-4xl mx-auto">
+      {topContent}
       {title && <h3 className="font-bold text-lg mb-2">{title}</h3>}
       <div>{children}</div>
     </div>
@@ -120,7 +143,7 @@ async function Domain({
 }) {
   return (
     <>
-      <TocCard domain={domain} />
+      <TocCard domain={domain} versionSlug={versionSlug} />
       <h2 className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto">Methods</h2>
       <Card>
         {domain.commands.map((command, index) => (
@@ -129,6 +152,7 @@ async function Domain({
             {index > 0 && <hr className="my-4" />}
             <MemberHeading
               kind="method"
+              versionSlug={versionSlug}
               member={command}
               domain={domain.domain}
             />
@@ -158,6 +182,7 @@ async function Domain({
                 {index > 0 && <hr className="my-4" />}
                 <MemberHeading
                   kind="event"
+                  versionSlug={versionSlug}
                   member={event}
                   domain={domain.domain}
                 />
@@ -184,6 +209,7 @@ async function Domain({
                 {index > 0 && <hr className="my-4" />}
                 <MemberHeading
                   kind="type"
+                  versionSlug={versionSlug}
                   member={type}
                   domain={domain.domain}
                 />
@@ -228,9 +254,20 @@ type Type =
       $ref: string;
     };
 
-function TocCard({ domain }: { domain: ProtocolDomain }) {
+function TocCard({
+  domain,
+  versionSlug,
+}: {
+  domain: ProtocolDomain;
+  versionSlug: string;
+}) {
   return (
-    <Card title={`${domain.domain} Domain`}>
+    <Card
+      title={`${domain.domain} Domain`}
+      topContent={
+        <DomainExternalLinks domain={domain.domain} versionSlug={versionSlug} />
+      }
+    >
       {'description' in domain && domain.description && (
         <Markdown>{domain.description}</Markdown>
       )}
@@ -462,6 +499,7 @@ function MemberHeading({
   kind,
   member,
   domain,
+  versionSlug,
 }: {
   kind: 'method' | 'event' | 'type';
   member: {
@@ -469,17 +507,81 @@ function MemberHeading({
     deprecated?: boolean;
   } & ({ name: string } | { id: string });
   domain: string;
+  versionSlug: string;
 }) {
   const key = 'name' in member ? member.name : member.id;
   return (
-    <h3
-      className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
-      id={`${kind}-${encodeURIComponent(key)}`}
-    >
-      <DimText>{domain}.</DimText>
-      {key} <FeatureStatusTags for={member} />
-      <CopyableAnchor href={`#${kind}-${encodeURIComponent(key)}`} />
-    </h3>
+    <>
+      <MemberExternalLinks
+        kind={kind}
+        memberKey={key}
+        domain={domain}
+        versionSlug={versionSlug}
+      />
+      <h3
+        className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
+        id={`${kind}-${encodeURIComponent(key)}`}
+      >
+        <DimText>{domain}.</DimText>
+        {key} <FeatureStatusTags for={member} />
+        <CopyableAnchor href={`#${kind}-${encodeURIComponent(key)}`} />
+      </h3>
+    </>
+  );
+}
+
+function DomainExternalLinks({
+  domain,
+  versionSlug,
+}: {
+  domain: string;
+  versionSlug: string;
+}) {
+  const cdpUrl = `https://chromedevtools.github.io/devtools-protocol/${encodeURIComponent(
+    versionSlug,
+  )}/${encodeURIComponent(domain)}`;
+  return (
+    <div className="float-right">
+      <a href={cdpUrl} target="cdp-reference" title="View in CDP docs">
+        <Image
+          src="/images/chrome-devtools-circle-responsive.svg"
+          width={24}
+          height={24}
+          alt="Chrome DevTools"
+          about=""
+        />
+      </a>
+    </div>
+  );
+}
+
+function MemberExternalLinks({
+  kind,
+  memberKey,
+  versionSlug,
+  domain,
+}: {
+  kind: 'method' | 'event' | 'type';
+  memberKey: string;
+  versionSlug: string;
+  domain: string;
+}) {
+  const cdpUrl = `https://chromedevtools.github.io/devtools-protocol/${encodeURIComponent(
+    versionSlug,
+  )}/${encodeURIComponent(domain)}#${encodeURIComponent(
+    kind,
+  )}-${encodeURIComponent(memberKey)}`;
+  return (
+    <div className="float-right">
+      <a href={cdpUrl} target="cdp-reference" title="View in CDP docs">
+        <Image
+          src="/images/chrome-devtools-circle-responsive.svg"
+          width={24}
+          height={24}
+          alt="Chrome DevTools"
+        />
+      </a>
+    </div>
   );
 }
 
