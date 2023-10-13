@@ -13,6 +13,8 @@ import { HermesImplementationModel } from './HermesImplementationModel';
 import { ReactNode } from 'react';
 import { GitHubCommitLink } from '../ui/components/GitHubCommitLink';
 import { ProtocolModel } from './ProtocolModel';
+import { octokit } from './github/octokit';
+import { fetchWithOptions } from './fetchWithOptions';
 
 export type ProtocolDomain = Protocol.Domain;
 
@@ -81,22 +83,18 @@ export class ProtocolVersionsModel {
     }
     this.#loadDataPromise = (async () => {
       {
-        const res = await fetch(
-          `https://api.github.com/repos/${encodeURIComponent(
-            DEVTOOLS_PROTOCOL_REPO_OWNER,
-          )}/${encodeURIComponent(
-            DEVTOOLS_PROTOCOL_REPO_NAME,
-          )}/branches/${encodeURIComponent(DEVTOOLS_PROTOCOL_REPO_BRANCH)}`,
-          {
-            next: {
-              revalidate: 3 * 3600, // 3 hours
-            },
+        const { data } = await octokit.rest.repos.getBranch({
+          owner: DEVTOOLS_PROTOCOL_REPO_OWNER,
+          repo: DEVTOOLS_PROTOCOL_REPO_NAME,
+          branch: DEVTOOLS_PROTOCOL_REPO_BRANCH,
+          request: {
+            fetch: fetchWithOptions({
+              next: {
+                revalidate: 3 * 3600, // 3 hours
+              },
+            }),
           },
-        );
-        if (!res.ok) {
-          throw new Error(res.statusText);
-        }
-        const data = await res.json();
+        });
         const latestCommitSha = data.commit.sha;
         this.#devToolsProtocolRepoFetchMetadata = {
           commitSha: latestCommitSha,
@@ -104,44 +102,44 @@ export class ProtocolVersionsModel {
       }
       let devToolsBrowserProtocol, devToolsJsProtocol;
       {
-        const res = await fetch(
-          `https://raw.githubusercontent.com/${encodeURIComponent(
-            DEVTOOLS_PROTOCOL_REPO_OWNER,
-          )}/${encodeURIComponent(
-            DEVTOOLS_PROTOCOL_REPO_NAME,
-          )}/${encodeURIComponent(
-            this.#devToolsProtocolRepoFetchMetadata.commitSha,
-          )}/json/browser_protocol.json`,
-          {
-            next: {
-              tags: ['ProtocolVersionsModel'],
-            },
+        const { data } = await octokit.rest.repos.getContent({
+          owner: DEVTOOLS_PROTOCOL_REPO_OWNER,
+          repo: DEVTOOLS_PROTOCOL_REPO_NAME,
+          path: 'json/browser_protocol.json',
+          ref: this.#devToolsProtocolRepoFetchMetadata.commitSha,
+          mediaType: {
+            format: 'raw',
           },
-        );
-        if (!res.ok) {
-          throw new Error(res.statusText);
-        }
-        devToolsBrowserProtocol = await res.json();
+          request: {
+            fetch: fetchWithOptions({
+              next: {
+                tags: ['ProtocolVersionsModel'],
+              },
+            }),
+          },
+        });
+
+        devToolsBrowserProtocol = JSON.parse(data as any);
       }
       {
-        const res = await fetch(
-          `https://raw.githubusercontent.com/${encodeURIComponent(
-            DEVTOOLS_PROTOCOL_REPO_OWNER,
-          )}/${encodeURIComponent(
-            DEVTOOLS_PROTOCOL_REPO_NAME,
-          )}/${encodeURIComponent(
-            this.#devToolsProtocolRepoFetchMetadata.commitSha,
-          )}/json/js_protocol.json`,
-          {
-            next: {
-              tags: ['ProtocolVersionsModel'],
-            },
+        const { data } = await octokit.rest.repos.getContent({
+          owner: DEVTOOLS_PROTOCOL_REPO_OWNER,
+          repo: DEVTOOLS_PROTOCOL_REPO_NAME,
+          path: 'json/js_protocol.json',
+          ref: this.#devToolsProtocolRepoFetchMetadata.commitSha,
+          mediaType: {
+            format: 'raw',
           },
-        );
-        if (!res.ok) {
-          throw new Error(res.statusText);
-        }
-        devToolsJsProtocol = await res.json();
+          request: {
+            fetch: fetchWithOptions({
+              next: {
+                tags: ['ProtocolVersionsModel'],
+              },
+            }),
+          },
+        });
+
+        devToolsJsProtocol = JSON.parse(data as any);
       }
 
       const totProtocol: IProtocol = {

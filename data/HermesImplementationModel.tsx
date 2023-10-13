@@ -6,6 +6,8 @@ import {
 } from './ImplementationModel';
 import { IProtocol } from '@/third-party/protocol-schema';
 import { ReactNode } from 'react';
+import { octokit } from './github/octokit';
+import { fetchWithOptions } from './fetchWithOptions';
 
 const CDP_HANDLER_CPP = 'API/hermes/inspector/chrome/CDPHandler.cpp';
 const MESSAGE_TYPES_H = 'API/hermes/inspector/chrome/MessageTypes.h';
@@ -35,24 +37,23 @@ export class HermesImplementationModel
       return;
     }
     const { owner, repo, commitSha } = this.#repoFetchMetadata!;
-    const res = await fetch(
-      `https://raw.githubusercontent.com/${encodeURIComponent(
-        owner,
-      )}/${encodeURIComponent(repo)}/${encodeURIComponent(
-        commitSha,
-      )}/${encodeURIComponent(path)}`,
-      {
-        next: {
-          revalidate: 3600, // 1 hour
-        },
+    const { data } = await octokit.rest.repos.getContent({
+      owner,
+      repo,
+      path,
+      ref: commitSha,
+      mediaType: {
+        format: 'raw',
       },
-    );
-    if (!res.ok) {
-      throw new Error(
-        `Failed to fetch ${path}: ${res.status} ${res.statusText}`,
-      );
-    }
-    this.#files.set(path, await res.text());
+      request: {
+        fetch: fetchWithOptions({
+          next: {
+            revalidate: 3600, // 1 hour
+          },
+        }),
+      },
+    });
+    this.#files.set(path, data as any);
   }
 
   #fetchData() {
@@ -62,22 +63,18 @@ export class HermesImplementationModel
     this.#fetchDataPromise = (async () => {
       try {
         {
-          const res = await fetch(
-            `https://api.github.com/repos/${encodeURIComponent(
-              HERMES_REPO_OWNER,
-            )}/${encodeURIComponent(
-              HERMES_REPO_NAME,
-            )}/branches/${encodeURIComponent(HERMES_REPO_BRANCH)}`,
-            {
-              next: {
-                revalidate: 3 * 3600, // 3 hours
-              },
+          const { data } = await octokit.rest.repos.getBranch({
+            owner: HERMES_REPO_OWNER,
+            repo: HERMES_REPO_NAME,
+            branch: HERMES_REPO_BRANCH,
+            request: {
+              fetch: fetchWithOptions({
+                next: {
+                  revalidate: 3 * 3600, // 3 hours
+                },
+              }),
             },
-          );
-          if (!res.ok) {
-            throw new Error(res.statusText);
-          }
-          const data = await res.json();
+          });
           const latestCommitSha = data.commit.sha;
           this.#repoFetchMetadata = {
             owner: HERMES_REPO_OWNER,

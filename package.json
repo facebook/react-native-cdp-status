@@ -13,6 +13,7 @@
     "escape-string-regexp": "^5.0.0",
     "next": "13.5.4",
     "npm-registry-fetch": "^16.1.0",
+    "octokit": "^3.1.1",
     "react": "^18",
     "react-dom": "^18",
     "remark": "^15.0.1",
