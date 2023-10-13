@@ -8,6 +8,7 @@ import Link from 'next/link';
 import React, { ReactNode } from 'react';
 import { Markdown } from '@/ui/components/Markdown';
 import { CopyableAnchor } from '@/ui/components/CopyableAnchor';
+import { DimText } from '@/ui/components/DimText';
 
 export default async function Page({
   params: { version, domain: domainName },
@@ -134,7 +135,8 @@ async function Domain({
                   href={`#method-${encodeURIComponent(command.name)}`}
                   className="text-blue-600 hover:underline font-mono"
                 >
-                  {domain.domain}.{command.name}
+                  <DimText>{domain.domain}.</DimText>
+                  {command.name}
                 </Link>{' '}
                 <FeatureStatusTags for={command} />
               </li>
@@ -153,7 +155,8 @@ async function Domain({
                       href={`#event-${encodeURIComponent(event.name)}`}
                       className="text-blue-600 hover:underline font-mono"
                     >
-                      {domain.domain}.{event.name}
+                      <DimText>{domain.domain}.</DimText>
+                      {event.name}
                     </Link>{' '}
                     <FeatureStatusTags for={event} />
                   </li>
@@ -174,7 +177,8 @@ async function Domain({
                       href={`#type-${encodeURIComponent(type.id)}`}
                       className="text-blue-600 hover:underline font-mono"
                     >
-                      {domain.domain}.{type.id}
+                      <DimText>{domain.domain}.</DimText>
+                      {type.id}
                     </Link>{' '}
                     <FeatureStatusTags for={type} />
                   </li>
@@ -199,7 +203,8 @@ async function Domain({
               className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
               id={`method-${encodeURIComponent(command.name)}`}
             >
-              {domain.domain}.{command.name} <FeatureStatusTags for={command} />
+              <DimText>{domain.domain}.</DimText>
+              {command.name} <FeatureStatusTags for={command} />
               <CopyableAnchor
                 href={`#method-${encodeURIComponent(command.name)}`}
               />
@@ -249,7 +254,8 @@ async function Domain({
                   className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
                   id={`event-${encodeURIComponent(event.name)}`}
                 >
-                  {domain.domain}.{event.name} <FeatureStatusTags for={event} />
+                  <DimText>{domain.domain}.</DimText>
+                  {event.name} <FeatureStatusTags for={event} />
                   <CopyableAnchor
                     href={`#event-${encodeURIComponent(event.name)}`}
                   />
@@ -289,7 +295,8 @@ async function Domain({
                   className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
                   id={`type-${encodeURIComponent(type.id)}`}
                 >
-                  {domain.domain}.{type.id} <FeatureStatusTags for={type} />
+                  <DimText>{domain.domain}.</DimText>
+                  {type.id} <FeatureStatusTags for={type} />
                   <CopyableAnchor
                     href={`#type-${encodeURIComponent(type.id)}`}
                   />
