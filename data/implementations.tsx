@@ -1,5 +1,5 @@
 import { HermesImplementationModel } from './HermesImplementationModel';
-import { Protocol } from './protocols';
+import { IProtocol } from '@/third-party/protocol-schema';
 
 export type ImplementationProtocolReferences = {
   commands: Record<
@@ -33,7 +33,7 @@ export type ImplementationProtocolReferences = {
 
 export interface ImplementationModel {
   extractProtocolReferences(
-    protocol: Protocol,
+    protocol: IProtocol,
   ): Promise<ImplementationProtocolReferences>;
 }
 

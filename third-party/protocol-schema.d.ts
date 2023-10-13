@@ -1,5 +1,4 @@
-// Original: https://github.com/ChromeDevTools/devtools-protocol/blob/a60ce47e580a5c6cca8ccf2b4616ee3b3e4f2d62/scripts/protocol-schema.d.ts
-
+// Copyright (c) Meta Platforms, Inc. and affiliates.
 // Copyright 2014 The Chromium Authors. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,6 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+// Original: https://github.com/ChromeDevTools/devtools-protocol/blob/a60ce47e580a5c6cca8ccf2b4616ee3b3e4f2d62/scripts/protocol-schema.d.ts
+
 /**  Definition for protocol.json types */
 export interface IProtocol {
   version: Protocol.Version;
@@ -40,7 +41,12 @@ export module Protocol {
     minor: string;
   }
 
-  export interface Domain {
+  export interface Feature {
+    deprecated?: boolean;
+    experimental?: boolean;
+  }
+
+  export interface Domain extends Feature {
     /** Name of domain */
     domain: string;
     /** Description of the domain */
@@ -61,7 +67,7 @@ export module Protocol {
     redirect?: string;
   }
 
-  export interface Event {
+  export interface Event extends Feature {
     name: string;
     parameters?: PropertyType[];
     /** Description of the event */
@@ -102,7 +108,7 @@ export module Protocol {
     $ref: string;
   }
 
-  export interface PropertyBaseType {
+  export interface PropertyBaseType extends Feature {
     /** Name of param */
     name: string;
     /** Is the property optional ? */
@@ -116,7 +122,8 @@ export module Protocol {
     id: string;
     /** Description of the type */
     description?: string;
-  } & (StringType | ObjectType | ArrayType | PrimitiveType);
+  } & (StringType | ObjectType | ArrayType | PrimitiveType) &
+    Feature;
 
   type ProtocolType =
     | StringType

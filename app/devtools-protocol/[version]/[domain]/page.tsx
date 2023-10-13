@@ -14,6 +14,7 @@ import {
   ImplementationProtocolReferences,
   implementationModelsById,
 } from '@/data/implementations';
+import { Protocol } from '@/third-party/protocol-schema';
 
 type ProtocolImplementationData = {
   referencesByImplementationId: ReadonlyMap<
@@ -46,7 +47,7 @@ export default async function Page({
             implementationId,
             {
               references: await implementationModel.extractProtocolReferences(
-                protocol.protocol as any,
+                protocol.protocol,
               ),
             },
           ] as const,
@@ -147,11 +148,7 @@ function Tag({ children }: { children: ReactNode }) {
   );
 }
 
-function FeatureStatusTags({
-  for: for_,
-}: {
-  for: { experimental?: boolean; deprecated?: boolean; [key: string]: any };
-}) {
+function FeatureStatusTags({ for: for_ }: { for: Protocol.Feature }) {
   return (
     <>
       {'experimental' in for_ && for_.experimental && (
@@ -184,33 +181,39 @@ async function Domain({
         versionSlug={versionSlug}
         protocolImplementationData={protocolImplementationData}
       />
-      <h2 className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto">Methods</h2>
-      <Card>
-        {domain.commands.map((command, index) => (
-          <div key={command.name} className="group">
-            {/* add horizontal separator if not the first item */}
-            {index > 0 && <hr className="my-4" />}
-            <MemberHeading
-              kind="method"
-              versionSlug={versionSlug}
-              member={command}
-              domain={domain.domain}
-              protocolImplementationData={protocolImplementationData}
-            />
-            <MemberDescription member={command} />
-            <MemberParameters
-              member={command as any}
-              domain={domain.domain}
-              versionSlug={versionSlug}
-            />
-            <MethodReturnObject
-              command={command as any}
-              domain={domain.domain}
-              versionSlug={versionSlug}
-            />
-          </div>
-        ))}
-      </Card>
+      {domain.commands != null && domain.commands?.length !== 0 && (
+        <>
+          <h2 className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto">
+            Methods
+          </h2>
+          <Card>
+            {domain.commands.map((command, index) => (
+              <div key={command.name} className="group">
+                {/* add horizontal separator if not the first item */}
+                {index > 0 && <hr className="my-4" />}
+                <MemberHeading
+                  kind="method"
+                  versionSlug={versionSlug}
+                  member={command}
+                  domain={domain.domain}
+                  protocolImplementationData={protocolImplementationData}
+                />
+                <MemberDescription member={command} />
+                <MemberParameters
+                  member={command}
+                  domain={domain.domain}
+                  versionSlug={versionSlug}
+                />
+                <MethodReturnObject
+                  command={command}
+                  domain={domain.domain}
+                  versionSlug={versionSlug}
+                />
+              </div>
+            ))}
+          </Card>
+        </>
+      )}
       {domain.events != null && domain.events?.length !== 0 && (
         <>
           <h2 className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto">
@@ -230,7 +233,7 @@ async function Domain({
                 />
                 <MemberDescription member={event} />
                 <MemberParameters
-                  member={event as any}
+                  member={event}
                   domain={domain.domain}
                   versionSlug={versionSlug}
                 />
@@ -260,14 +263,14 @@ async function Domain({
                 <p>
                   Type:{' '}
                   <TypeLink
-                    type={type as any}
+                    type={type}
                     domain={domain.domain}
                     versionSlug={versionSlug}
                   />
                 </p>
-                <TypeDetail type={type as any} />
+                <TypeDetail type={type} />
                 <TypeProperties
-                  type={type as any}
+                  type={type}
                   domain={domain.domain}
                   versionSlug={versionSlug}
                 />
@@ -279,23 +282,6 @@ async function Domain({
     </>
   );
 }
-
-type Type =
-  | {
-      type: 'array';
-      items: Type;
-    }
-  | {
-      type: 'boolean' | 'integer' | 'number' | 'object' | 'any';
-    }
-  | {
-      type: 'string';
-      enum?: string[];
-    }
-  | {
-      type?: undefined;
-      $ref: string;
-    };
 
 function TocCard({
   domain,
@@ -351,7 +337,7 @@ function TypeLink({
   versionSlug,
   failIfEnum,
 }: {
-  type: Type | undefined;
+  type: Protocol.ProtocolType | undefined;
   domain: string;
   versionSlug: string;
   failIfEnum?: boolean;
@@ -361,6 +347,27 @@ function TypeLink({
   }
   if (failIfEnum && 'enum' in type && type.enum) {
     throw new Error(`Unexpected enum in this context: ${JSON.stringify(type)}`);
+  }
+  if ('$ref' in type) {
+    {
+      const { $ref } = type;
+      const { domain: resolvedDomain, localName } = resolveMaybeQualifiedRef({
+        $ref,
+        domain,
+      });
+      return (
+        <Link
+          href={`/devtools-protocol/${encodeURIComponent(
+            versionSlug,
+          )}/${encodeURIComponent(resolvedDomain)}#type-${encodeURIComponent(
+            localName,
+          )}`}
+          className="text-blue-600 hover:underline font-mono font-bold"
+        >
+          {$ref}
+        </Link>
+      );
+    }
   }
   switch (type.type) {
     case 'array':
@@ -383,34 +390,17 @@ function TypeLink({
     case 'number':
     case 'any':
       return <code className="font-mono font-bold">{type.type}</code>;
-
-    case undefined: {
-      const { $ref } = type;
-      const { domain: resolvedDomain, localName } = resolveMaybeQualifiedRef({
-        $ref,
-        domain,
-      });
-      return (
-        <Link
-          href={`/devtools-protocol/${encodeURIComponent(
-            versionSlug,
-          )}/${encodeURIComponent(resolvedDomain)}#type-${encodeURIComponent(
-            localName,
-          )}`}
-          className="text-blue-600 hover:underline font-mono font-bold"
-        >
-          {$ref}
-        </Link>
-      );
-    }
     default: {
-      throw new Error(`Unhandled type: ${JSON.stringify(type)}`);
+      throw new Error(`Unhandled type: ${JSON.stringify(type as never)}`);
     }
   }
 }
 
-function TypeDetail({ type }: { type: Type }) {
+function TypeDetail({ type }: { type: Protocol.ProtocolType }) {
   if (!type) {
+    return <></>;
+  }
+  if ('$ref' in type) {
     return <></>;
   }
   switch (type.type) {
@@ -437,10 +427,9 @@ function TypeDetail({ type }: { type: Type }) {
     case 'integer':
     case 'number':
     case 'any':
-    case undefined:
       return <></>;
     default: {
-      throw new Error(`Unhandled type: ${JSON.stringify(type)}`);
+      throw new Error(`Unhandled type: ${JSON.stringify(type as never)}`);
     }
   }
 }
@@ -465,15 +454,7 @@ function PropsTable({
   domain,
   versionSlug,
 }: {
-  items: Array<
-    {
-      name: string;
-      optional?: boolean;
-      description?: string;
-      experimental?: boolean;
-      deprecated?: boolean;
-    } & Type
-  >;
+  items: Array<Protocol.PropertyType>;
   domain: string;
   versionSlug: string;
 }) {
@@ -711,7 +692,6 @@ function MemberDescription({
 }: {
   member: {
     description?: string;
-    [key: string]: unknown;
   };
 }) {
   return (
@@ -728,18 +708,7 @@ function MemberParameters({
   domain,
   versionSlug,
 }: {
-  member: {
-    parameters?: Array<
-      {
-        name: string;
-        optional?: boolean;
-        description?: string;
-        experimental?: boolean;
-        deprecated?: boolean;
-      } & Type
-    >;
-    [key: string]: unknown;
-  };
+  member: Protocol.Event | Protocol.Command;
   domain: string;
   versionSlug: string;
 }) {
@@ -764,18 +733,7 @@ function TypeProperties({
   domain,
   versionSlug,
 }: {
-  type: {
-    properties?: Array<
-      {
-        name: string;
-        optional?: boolean;
-        description?: string;
-        experimental?: boolean;
-        deprecated?: boolean;
-      } & Type
-    >;
-    [key: string]: unknown;
-  };
+  type: Protocol.ProtocolType;
   domain: string;
   versionSlug: string;
 }) {
@@ -800,18 +758,7 @@ function MethodReturnObject({
   domain,
   versionSlug,
 }: {
-  command: {
-    returns?: Array<
-      {
-        name: string;
-        optional?: boolean;
-        description?: string;
-        experimental?: boolean;
-        deprecated?: boolean;
-      } & Type
-    >;
-    [key: string]: unknown;
-  };
+  command: Protocol.Command;
   domain: string;
   versionSlug: string;
 }) {
@@ -823,7 +770,7 @@ function MethodReturnObject({
           <>
             <h4 className="font-bold text-lg mt-4 mb-2">Return object</h4>
             <PropsTable
-              items={command.returns as any}
+              items={command.returns}
               domain={domain}
               versionSlug={versionSlug}
             />

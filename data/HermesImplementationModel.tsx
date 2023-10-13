@@ -2,7 +2,7 @@ import {
   ImplementationModel,
   ImplementationProtocolReferences,
 } from './implementations';
-import { Protocol } from './protocols';
+import { IProtocol } from '@/third-party/protocol-schema';
 
 const CDP_HANDLER_CPP = 'API/hermes/inspector/chrome/CDPHandler.cpp';
 const MESSAGE_TYPES_H = 'API/hermes/inspector/chrome/MessageTypes.h';
@@ -52,7 +52,7 @@ export class HermesImplementationModel implements ImplementationModel {
     return this.#fetchDataPromise;
   }
 
-  async extractProtocolReferences(protocol: Protocol) {
+  async extractProtocolReferences(protocol: IProtocol) {
     await this.#fetchData();
     const references: ImplementationProtocolReferences = {
       commands: {},
@@ -87,7 +87,7 @@ export class HermesImplementationModel implements ImplementationModel {
       }
     };
     for (const domain of protocol.domains) {
-      for (const command of domain.commands) {
+      for (const command of domain.commands ?? []) {
         const hermesRequestId = `m::${pascalCaseToCamelCase(
           domain.domain,
         )}::${camelCaseToPascalCase(command.name)}Request`;

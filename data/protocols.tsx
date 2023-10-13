@@ -9,19 +9,21 @@
 
 import DevToolsBrowserProtocol from 'devtools-protocol/json/browser_protocol.json';
 import DevToolsJsProtocol from 'devtools-protocol/json/js_protocol.json';
+import { Protocol, IProtocol } from '@/third-party/protocol-schema';
 
-const totProtocol = {
-  domains: [...DevToolsBrowserProtocol.domains, ...DevToolsJsProtocol.domains]
+const totProtocol: IProtocol = {
+  ...DevToolsBrowserProtocol,
+  domains: (
+    [
+      ...DevToolsBrowserProtocol.domains,
+      ...DevToolsJsProtocol.domains,
+    ] as ProtocolDomain[]
+  )
     .map(sortDomainMembers)
     .sort((a, b) => a.domain.localeCompare(b.domain)),
 } as const;
 
-export type Protocol = Pick<
-  typeof DevToolsJsProtocol | typeof DevToolsBrowserProtocol,
-  'domains'
->;
-
-export type ProtocolDomain = Protocol['domains'][number];
+export type ProtocolDomain = Protocol.Domain;
 
 type DomainMemberBase = {
   experimental?: boolean;
@@ -41,7 +43,7 @@ function memberSort(a: DomainMemberBase, b: DomainMemberBase) {
 function sortDomainMembers(domain: ProtocolDomain): ProtocolDomain {
   return {
     ...domain,
-    commands: [...domain.commands].sort(memberSort),
+    ...(domain.commands && { commands: [...domain.commands].sort(memberSort) }),
     ...(domain.events && {
       events: [...domain.events].sort(memberSort),
     }),
@@ -51,22 +53,13 @@ function sortDomainMembers(domain: ProtocolDomain): ProtocolDomain {
   } as ProtocolDomain;
 }
 
-const isNotExperimentalOrDeprecated = <
-  T extends {
-    experimental?: boolean;
-    deprecated?: boolean;
-    [key: string]: unknown;
-  },
->(
-  item: T,
-) => !item.experimental && !item.deprecated;
+const isNotExperimentalOrDeprecated = (item: Protocol.Feature) =>
+  !item.experimental && !item.deprecated;
 
 const devToolsProtocolsByVersionSlug: ReadonlyMap<
   string,
   Readonly<{
-    protocol: {
-      domains: ProtocolDomain[];
-    };
+    protocol: IProtocol;
     metadata: {
       versionName: string;
       versionSlug: string;
@@ -83,7 +76,7 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
   [
     'v8',
     {
-      protocol: DevToolsJsProtocol,
+      protocol: DevToolsJsProtocol as IProtocol,
       metadata: { versionName: 'v8-inspector (node)', versionSlug: 'v8' },
     },
   ],
@@ -91,11 +84,12 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
     `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
     {
       protocol: {
+        ...totProtocol,
         domains: totProtocol.domains.filter(isNotExperimentalOrDeprecated).map(
           (domain) =>
             ({
               ...domain,
-              commands: domain.commands.filter(isNotExperimentalOrDeprecated),
+              commands: domain.commands?.filter(isNotExperimentalOrDeprecated),
               events:
                 domain.events?.filter(isNotExperimentalOrDeprecated) ?? [],
               types: domain.types?.filter(isNotExperimentalOrDeprecated) ?? [],
