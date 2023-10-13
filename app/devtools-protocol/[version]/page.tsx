@@ -28,6 +28,7 @@ export default async function Page({
     <main className="p-4 flex-grow">
       <Card title={'Protocol version ' + protocol.metadata.versionName}>
         <Markdown>{protocol.metadata.description}</Markdown>
+        <p className="text-xs">{protocol.metadata.dataSourceDescription}</p>
         <ImplementationStatsHeader />
         <ImplementationStats
           implementationId="hermes"

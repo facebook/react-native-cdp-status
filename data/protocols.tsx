@@ -12,6 +12,11 @@ import DevToolsJsProtocol from 'devtools-protocol/json/js_protocol.json';
 import { Protocol, IProtocol } from '@/third-party/protocol-schema';
 import { HermesImplementationModel } from './HermesImplementationModel';
 
+import DevToolsProtocolPackage from 'devtools-protocol/package.json';
+import { ReactNode } from 'react';
+import { Markdown } from '@/ui/components/Markdown';
+import { NpmPackageVersionLink } from './components/NpmPackageVersionLink';
+
 const totProtocol: IProtocol = {
   ...DevToolsBrowserProtocol,
   domains: (
@@ -57,6 +62,17 @@ function sortDomainMembers(domain: ProtocolDomain): ProtocolDomain {
 const isNotExperimentalOrDeprecated = (item: Protocol.Feature) =>
   !item.experimental && !item.deprecated;
 
+const dataSourceDescription = (
+  <>
+    Protocol data is from{' '}
+    <NpmPackageVersionLink
+      name={DevToolsProtocolPackage.name}
+      version={DevToolsProtocolPackage.version}
+    />
+    .
+  </>
+);
+
 const devToolsProtocolsByVersionSlug: ReadonlyMap<
   string,
   Readonly<{
@@ -65,6 +81,7 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
       description: string;
       versionName: string;
       versionSlug: string;
+      dataSourceDescription: ReactNode;
     };
   }>
 > = new Map([
@@ -76,6 +93,7 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
         description: '',
         versionName: 'latest (tip-of-tree)',
         versionSlug: 'tot',
+        dataSourceDescription,
       },
     },
   ],
@@ -87,6 +105,7 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
         description: '',
         versionName: 'v8-inspector (node)',
         versionSlug: 'v8',
+        dataSourceDescription,
       },
     },
   ],
@@ -111,6 +130,7 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
         description: '',
         versionName: `stable RC (${DevToolsBrowserProtocol.version.major}.${DevToolsBrowserProtocol.version.minor})`,
         versionSlug: `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
+        dataSourceDescription,
       },
     },
   ],
@@ -130,6 +150,7 @@ NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatic
 `,
         versionName: 'hermes',
         versionSlug: 'hermes',
+        dataSourceDescription,
       },
     },
   ],

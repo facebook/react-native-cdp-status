@@ -13,6 +13,7 @@
     "devtools-protocol": "^0.0.1208070",
     "escape-string-regexp": "^5.0.0",
     "next": "13.5.4",
+    "npm-registry-fetch": "^16.1.0",
     "react": "^18",
     "react-dom": "^18",
     "remark": "^15.0.1",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/npm-registry-fetch": "^8.0.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10",
