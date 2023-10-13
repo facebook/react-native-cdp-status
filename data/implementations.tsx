@@ -1,41 +1,6 @@
 import { HermesImplementationModel } from './HermesImplementationModel';
 import { IProtocol } from '@/third-party/protocol-schema';
-
-export type ImplementationProtocolReferences = {
-  commands: Record<
-    string,
-    {
-      path: string;
-      match: string;
-      index: number;
-      length: number;
-    }[]
-  >;
-  events: Record<
-    string,
-    {
-      path: string;
-      match: string;
-      index: number;
-      length: number;
-    }[]
-  >;
-  types: Record<
-    string,
-    {
-      path: string;
-      match: string;
-      index: number;
-      length: number;
-    }[]
-  >;
-};
-
-export interface ImplementationModel {
-  extractProtocolReferences(
-    protocol: IProtocol,
-  ): Promise<ImplementationProtocolReferences>;
-}
+import { ImplementationModel } from './ImplementationModel';
 
 export const implementationModelsById: ReadonlyMap<
   string,

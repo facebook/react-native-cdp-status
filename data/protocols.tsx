@@ -10,6 +10,7 @@
 import DevToolsBrowserProtocol from 'devtools-protocol/json/browser_protocol.json';
 import DevToolsJsProtocol from 'devtools-protocol/json/js_protocol.json';
 import { Protocol, IProtocol } from '@/third-party/protocol-schema';
+import { HermesImplementationModel } from './HermesImplementationModel';
 
 const totProtocol: IProtocol = {
   ...DevToolsBrowserProtocol,
@@ -59,7 +60,7 @@ const isNotExperimentalOrDeprecated = (item: Protocol.Feature) =>
 const devToolsProtocolsByVersionSlug: ReadonlyMap<
   string,
   Readonly<{
-    protocol: IProtocol;
+    protocol: IProtocol | (() => Promise<IProtocol>);
     metadata: {
       versionName: string;
       versionSlug: string;
@@ -100,6 +101,20 @@ const devToolsProtocolsByVersionSlug: ReadonlyMap<
       metadata: {
         versionName: `stable RC (${DevToolsBrowserProtocol.version.major}.${DevToolsBrowserProtocol.version.minor})`,
         versionSlug: `${DevToolsBrowserProtocol.version.major}-${DevToolsBrowserProtocol.version.minor}`,
+      },
+    },
+  ],
+  [
+    'hermes',
+    {
+      protocol: async () => {
+        return await new HermesImplementationModel().filterProtocol(
+          totProtocol,
+        );
+      },
+      metadata: {
+        versionName: 'hermes',
+        versionSlug: 'hermes',
       },
     },
   ],

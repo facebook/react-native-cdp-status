@@ -1,14 +1,20 @@
 import {
   ImplementationModel,
+  ImplementationModelBase,
   ImplementationProtocolReferences,
-} from './implementations';
+} from './ImplementationModel';
 import { IProtocol } from '@/third-party/protocol-schema';
 
 const CDP_HANDLER_CPP = 'API/hermes/inspector/chrome/CDPHandler.cpp';
 const MESSAGE_TYPES_H = 'API/hermes/inspector/chrome/MessageTypes.h';
 
-export class HermesImplementationModel implements ImplementationModel {
-  constructor() {}
+export class HermesImplementationModel
+  extends ImplementationModelBase
+  implements ImplementationModel
+{
+  constructor() {
+    super();
+  }
 
   #files = new Map<string, string>();
   #fetchDataPromise: Promise<void> | undefined;

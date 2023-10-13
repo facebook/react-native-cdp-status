@@ -10,11 +10,10 @@ import { CopyableAnchor } from '@/ui/components/CopyableAnchor';
 import { DimText } from '@/ui/components/DimText';
 import Image from 'next/image';
 import { ExternalLink } from '@/ui/components/ExternalLink';
-import {
-  ImplementationProtocolReferences,
-  implementationModelsById,
-} from '@/data/implementations';
+import { implementationModelsById } from '@/data/implementations';
 import { Protocol } from '@/third-party/protocol-schema';
+import { ImplementationProtocolReferences } from '@/data/ImplementationModel';
+import { resolveMaybeQualifiedRef } from '@/data/ProtocolModel';
 
 type ProtocolImplementationData = {
   referencesByImplementationId: ReadonlyMap<
@@ -35,7 +34,10 @@ export default async function Page({
   if (!protocol) {
     return notFound();
   }
-  const domain = protocol.protocol.domains.find((d) => d.domain === domainName);
+  const resolvedProtocol = await (typeof protocol.protocol === 'function'
+    ? protocol.protocol()
+    : protocol.protocol);
+  const domain = resolvedProtocol.domains.find((d) => d.domain === domainName);
   if (!domain) {
     return notFound();
   }
@@ -46,9 +48,10 @@ export default async function Page({
           [
             implementationId,
             {
-              references: await implementationModel.extractProtocolReferences(
-                protocol.protocol,
-              ),
+              references:
+                await implementationModel.extractProtocolReferences(
+                  resolvedProtocol,
+                ),
             },
           ] as const,
       ),
@@ -78,7 +81,7 @@ export default async function Page({
           </ul>
           <h2 className="font-bold text-lg p-4">Domains</h2>
           <ul className="p-0">
-            {protocol.protocol.domains.map((domain) => (
+            {resolvedProtocol.domains.map((domain) => (
               <li key={domain.domain} className="flex flex-col">
                 <Link
                   className={`text-blue-600 hover:underline py-1 border-s-[16px] pl-4 hover:bg-stone-200 ${
@@ -434,21 +437,6 @@ function TypeDetail({ type }: { type: Protocol.ProtocolType }) {
   }
 }
 
-function resolveMaybeQualifiedRef({
-  $ref,
-  domain,
-}: {
-  $ref: string;
-  domain: string;
-}) {
-  if ($ref.includes('.')) {
-    const [qualifiedDomain, ...rest] = $ref.split('.');
-    const localName = rest.join('.');
-    return { domain: qualifiedDomain, localName };
-  }
-  return { domain, localName: $ref };
-}
-
 function PropsTable({
   items,
   domain,
@@ -783,7 +771,10 @@ function MethodReturnObject({
 export async function generateStaticParams() {
   const params = [];
   for (const protocol of Array.from(devToolsProtocolsByVersionSlug.values())) {
-    for (const domain of protocol.protocol.domains) {
+    const resolvedProtocol = await (typeof protocol.protocol === 'function'
+      ? protocol.protocol()
+      : protocol.protocol);
+    for (const domain of resolvedProtocol.domains) {
       params.push({
         version: protocol.metadata.versionSlug,
         domain: domain.domain,
