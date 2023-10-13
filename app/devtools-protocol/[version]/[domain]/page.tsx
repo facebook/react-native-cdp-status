@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import React, { ReactNode } from 'react';
 import { Markdown } from '@/ui/components/Markdown';
+import { CopyableAnchor } from '@/ui/components/CopyableAnchor';
 
 export default async function Page({
   params: { version, domain: domainName },
@@ -191,7 +192,7 @@ async function Domain({
       </h2>
       <Card>
         {domain.commands.map((command, index) => (
-          <React.Fragment key={command.name}>
+          <div key={command.name} className="group">
             {/* add horizontal separator if not the first item */}
             {index > 0 && <hr className="my-4" />}
             <h3
@@ -199,6 +200,9 @@ async function Domain({
               id={`method-${encodeURIComponent(command.name)}`}
             >
               {domain.domain}.{command.name} <FeatureStatusTags for={command} />
+              <CopyableAnchor
+                href={`#method-${encodeURIComponent(command.name)}`}
+              />
             </h3>
             {'description' in command && command.description && (
               <Markdown>{command.description}</Markdown>
@@ -225,7 +229,7 @@ async function Domain({
                   />
                 </>
               )}
-          </React.Fragment>
+          </div>
         ))}
       </Card>
       {domain.events != null && domain.events?.length !== 0 && (
@@ -238,7 +242,7 @@ async function Domain({
           </h2>
           <Card>
             {domain.events.map((event, index) => (
-              <React.Fragment key={event.name}>
+              <div key={event.name} className="group">
                 {/* add horizontal separator if not the first item */}
                 {index > 0 && <hr className="my-4" />}
                 <h3
@@ -246,6 +250,9 @@ async function Domain({
                   id={`event-${encodeURIComponent(event.name)}`}
                 >
                   {domain.domain}.{event.name} <FeatureStatusTags for={event} />
+                  <CopyableAnchor
+                    href={`#event-${encodeURIComponent(event.name)}`}
+                  />
                 </h3>
                 {'description' in event && event.description && (
                   <Markdown>{event.description}</Markdown>
@@ -260,7 +267,7 @@ async function Domain({
                     />
                   </>
                 )}
-              </React.Fragment>
+              </div>
             ))}
           </Card>
         </>
@@ -275,7 +282,7 @@ async function Domain({
           </h2>
           <Card>
             {domain.types.map((type, index) => (
-              <React.Fragment key={type.id}>
+              <div key={type.id} className="group">
                 {/* add horizontal separator if not the first item */}
                 {index > 0 && <hr className="my-4" />}
                 <h3
@@ -283,6 +290,9 @@ async function Domain({
                   id={`type-${encodeURIComponent(type.id)}`}
                 >
                   {domain.domain}.{type.id} <FeatureStatusTags for={type} />
+                  <CopyableAnchor
+                    href={`#type-${encodeURIComponent(type.id)}`}
+                  />
                 </h3>
                 {'description' in type && type.description && (
                   <Markdown>{type.description}</Markdown>
@@ -306,7 +316,7 @@ async function Domain({
                     />
                   </>
                 )}
-              </React.Fragment>
+              </div>
             ))}
           </Card>
         </>
