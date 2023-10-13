@@ -15,6 +15,7 @@ import { GitHubCommitLink } from '../ui/components/GitHubCommitLink';
 import { ProtocolModel } from './ProtocolModel';
 import { octokit } from './github/octokit';
 import { fetchWithOptions } from './fetchWithOptions';
+import { GitHubCommitTime } from '@/ui/components/GitHubCommitTime';
 
 export type ProtocolDomain = Protocol.Domain;
 
@@ -158,6 +159,11 @@ export class ProtocolVersionsModel {
         <>
           Protocol data is from{' '}
           <GitHubCommitLink
+            owner={DEVTOOLS_PROTOCOL_REPO_OWNER}
+            repo={DEVTOOLS_PROTOCOL_REPO_NAME}
+            commitSha={this.#devToolsProtocolRepoFetchMetadata.commitSha}
+          />{' '}
+          <GitHubCommitTime
             owner={DEVTOOLS_PROTOCOL_REPO_OWNER}
             repo={DEVTOOLS_PROTOCOL_REPO_NAME}
             commitSha={this.#devToolsProtocolRepoFetchMetadata.commitSha}

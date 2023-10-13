@@ -8,6 +8,7 @@ import { IProtocol } from '@/third-party/protocol-schema';
 import { ReactNode } from 'react';
 import { octokit } from './github/octokit';
 import { fetchWithOptions } from './fetchWithOptions';
+import { GitHubCommitTime } from '@/ui/components/GitHubCommitTime';
 
 const CDP_HANDLER_CPP = 'API/hermes/inspector/chrome/CDPHandler.cpp';
 const MESSAGE_TYPES_H = 'API/hermes/inspector/chrome/MessageTypes.h';
@@ -179,7 +180,8 @@ export class HermesImplementationModel
     return (
       <>
         Hermes data is from{' '}
-        <GitHubCommitLink commitSha={commitSha} owner={owner} repo={repo} />.
+        <GitHubCommitLink commitSha={commitSha} owner={owner} repo={repo} />{' '}
+        <GitHubCommitTime owner={owner} repo={repo} commitSha={commitSha} />.
       </>
     );
   }
