@@ -57,12 +57,12 @@ function FeatureStatusTags({ for: for_ }: { for: Protocol.Feature }) {
   return (
     <>
       {'experimental' in for_ && for_.experimental && (
-        <span className="bg-red-300 rounded-lg px-2 py-1 text-sm text-gray-700 font-sans font-normal">
+        <span className="bg-red-300 dark:bg-red-500 rounded-lg px-2 py-1 text-sm text-gray-700 dark:text-gray-800 font-sans font-normal">
           Experimental
         </span>
       )}
       {'deprecated' in for_ && for_.deprecated && (
-        <span className="bg-orange-300 rounded-lg px-2 py-1 text-sm text-gray-700 font-sans font-normal">
+        <span className="bg-orange-300 dark:bg-orange-500 rounded-lg px-2 py-1 text-sm text-gray-700 dark:text-gray-800 font-sans font-normal">
           Deprecated
         </span>
       )}

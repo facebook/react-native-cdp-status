@@ -43,12 +43,24 @@ export default async function Page({
 function ImplementationStatsHeader() {
   return (
     <div className="flex flex-row">
-      <div className="text-sm w-1/6 text-gray-500">Implementation</div>
-      <div className="text-sm w-1/6 text-gray-500">Coverage</div>
-      <div className="text-sm w-1/6 text-gray-500">Domains</div>
-      <div className="text-sm w-1/6 text-gray-500">Commands</div>
-      <div className="text-sm w-1/6 text-gray-500">Events</div>
-      <div className="text-sm w-1/6 text-gray-500">Types</div>
+      <div className="text-sm w-1/6 text-gray-500 dark:text-gray-400">
+        Implementation
+      </div>
+      <div className="text-sm w-1/6 text-gray-500 dark:text-gray-400">
+        Coverage
+      </div>
+      <div className="text-sm w-1/6 text-gray-500 dark:text-gray-400">
+        Domains
+      </div>
+      <div className="text-sm w-1/6 text-gray-500 dark:text-gray-400">
+        Commands
+      </div>
+      <div className="text-sm w-1/6 text-gray-500 dark:text-gray-400">
+        Events
+      </div>
+      <div className="text-sm w-1/6 text-gray-500 dark:text-gray-400">
+        Types
+      </div>
     </div>
   );
 }
