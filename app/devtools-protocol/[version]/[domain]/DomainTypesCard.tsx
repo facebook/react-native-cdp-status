@@ -1,4 +1,4 @@
-import { ProtocolMetadata } from '@/data/protocols';
+import { ProtocolVersionMetadata } from '@/data/ProtocolVersionModel';
 import React from 'react';
 import { ProtocolImplementationData } from '../data';
 import { Card } from '@/ui/components/Card';
@@ -16,7 +16,7 @@ export function DomainTypesCard({
 }: {
   domain: Protocol.Domain;
   protocolImplementationData: ProtocolImplementationData;
-  protocolMetadata: ProtocolMetadata;
+  protocolMetadata: ProtocolVersionMetadata;
 }) {
   return (
     domain.types != null &&

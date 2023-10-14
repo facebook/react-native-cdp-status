@@ -1,10 +1,10 @@
-import { ProtocolMetadata } from '@/data/protocols';
+import { ProtocolVersionMetadata } from '@/data/ProtocolVersionModel';
 import Image from 'next/image';
 
 export function ProtocolVersionExternalLinks({
   protocolMetadata,
 }: {
-  protocolMetadata: ProtocolMetadata;
+  protocolMetadata: ProtocolVersionMetadata;
 }) {
   const cdpUrl = protocolMetadata.isAvailableUpstream
     ? `https://chromedevtools.github.io/devtools-protocol/${encodeURIComponent(

@@ -1,14 +1,7 @@
-import {
-  ProtocolDomain,
-  ProtocolMetadata,
-  protocolVersionsModel,
-} from '@/data/protocols';
+import { protocolVersionsModel } from '@/data/protocols';
 import { notFound } from 'next/navigation';
 import React from 'react';
-import {
-  ProtocolImplementationData,
-  getProtocolImplementationData,
-} from '../data';
+import { getProtocolImplementationData } from '../data';
 import { DomainTocCard } from './DomainTocCard';
 import { DomainMethodsCard } from './DomainMethodsCard';
 import { DomainEventsCard } from './DomainEventsCard';

@@ -1,4 +1,4 @@
-import { ProtocolMetadata } from '@/data/protocols';
+import { ProtocolVersionMetadata } from '@/data/ProtocolVersionModel';
 import React from 'react';
 import { CopyableAnchor } from '@/ui/components/CopyableAnchor';
 import { DimText } from '@/ui/components/DimText';
@@ -20,7 +20,7 @@ export function DomainMemberHeading({
   } & ({ name: string } | { id: string });
   domain: string;
   protocolImplementationData: ProtocolImplementationData;
-  protocolMetadata: ProtocolMetadata;
+  protocolMetadata: ProtocolVersionMetadata;
 }) {
   const key = 'name' in member ? member.name : member.id;
   return (

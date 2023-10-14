@@ -1,4 +1,4 @@
-import { ProtocolDomain, ProtocolMetadata } from '@/data/protocols';
+import { ProtocolVersionMetadata } from '@/data/ProtocolVersionModel';
 import React from 'react';
 import { Markdown } from '@/ui/components/Markdown';
 import { ProtocolImplementationData } from '../data';
@@ -6,15 +6,16 @@ import { Card } from '@/ui/components/Card';
 import { FeatureStatusTags } from './FeatureStatusTags';
 import { DomainExternalLinks } from './DomainExternalLinks';
 import { DomainTocSection } from './DomainTocSection';
+import { Protocol } from '@/third-party/protocol-schema';
 
 export function DomainTocCard({
   domain,
   protocolImplementationData,
   protocolMetadata,
 }: {
-  domain: ProtocolDomain;
+  domain: Protocol.Domain;
   protocolImplementationData: ProtocolImplementationData;
-  protocolMetadata: ProtocolMetadata;
+  protocolMetadata: ProtocolVersionMetadata;
 }) {
   return (
     <Card

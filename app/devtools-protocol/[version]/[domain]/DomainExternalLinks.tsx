@@ -1,4 +1,4 @@
-import { ProtocolMetadata } from '@/data/protocols';
+import { ProtocolVersionMetadata } from '@/data/ProtocolVersionModel';
 import React from 'react';
 import Image from 'next/image';
 
@@ -7,7 +7,7 @@ export function DomainExternalLinks({
   protocolMetadata,
 }: {
   domain: string;
-  protocolMetadata: ProtocolMetadata;
+  protocolMetadata: ProtocolVersionMetadata;
 }) {
   const upstreamVersionSlug = protocolMetadata.isAvailableUpstream
     ? protocolMetadata.versionSlug
