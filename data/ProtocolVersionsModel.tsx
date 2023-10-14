@@ -139,6 +139,12 @@ export class ProtocolVersionsModel {
             protocol: async () => {
               return sortProtocolDomainsAndMembers(
                 JSON.parse(
+                  // TODO: Cache this for longer as the 1.2 data is unlikely to change
+                  // e.g. instead of querying for HEAD, we can ask GitHub for the latest
+                  // commit that affected 1-2.json and read that. This would also make
+                  // for a more informative commit hash and timestamp.
+                  // We can also consider doing the same for 1.3 actually, rather than
+                  // rederiving it from tot.
                   await fetchFileFromGitHub({
                     owner: DEVTOOLS_PROTOCOL_VIEWER_REPO.owner,
                     repo: DEVTOOLS_PROTOCOL_VIEWER_REPO.repo,
@@ -160,6 +166,7 @@ export class ProtocolVersionsModel {
                   commitSha:
                     this.#devToolsProtocolRepoFetchMetadata
                       .devToolsProtocolViewerCommitSha,
+                  // TODO: Record the path here and generate a direct link to the file.
                 },
               },
               isAvailableUpstream: true,
