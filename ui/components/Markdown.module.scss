@@ -1,7 +1,9 @@
 .markdown {
-  /* standard list style with bullets */
-  ul {
-    list-style: disc;
-    margin-left: 1.5rem;
+  @apply prose dark:prose-invert max-w-none;
+  :first-child {
+    @apply mt-0;
+  }
+  :last-child {
+    @apply mb-0;
   }
 }
