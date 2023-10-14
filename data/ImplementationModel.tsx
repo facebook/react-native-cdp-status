@@ -36,10 +36,11 @@ export interface ImplementationModel {
     protocol: IProtocol,
   ): Promise<ImplementationProtocolReferences>;
   filterProtocol(protocol: IProtocol): Promise<IProtocol>;
-  getDataSourceDescription(): Promise<JSX.Element>;
   getDataSourceMetadata(): Promise<DataSourceMetadata>;
+  readonly displayName: string;
 }
 export abstract class ImplementationModelBase implements ImplementationModel {
+  abstract readonly displayName: string;
   abstract extractProtocolReferences(
     protocol: IProtocol,
   ): Promise<ImplementationProtocolReferences>;
@@ -93,9 +94,5 @@ export abstract class ImplementationModelBase implements ImplementationModel {
         })),
       ] as const,
     });
-  }
-
-  getDataSourceDescription(): Promise<JSX.Element> {
-    return Promise.resolve(<></>);
   }
 }

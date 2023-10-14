@@ -10,12 +10,9 @@
 import { Protocol, IProtocol } from '@/third-party/protocol-schema';
 import { HermesImplementationModel } from './HermesImplementationModel';
 
-import { ReactNode } from 'react';
-import { GitHubCommitLink } from '../ui/components/GitHubCommitLink';
 import { ProtocolModel } from './ProtocolModel';
 import { octokit } from './github/octokit';
 import { fetchWithOptions } from './fetchWithOptions';
-import { GitHubCommitTime } from '@/ui/components/GitHubCommitTime';
 
 export type ProtocolDomain = Protocol.Domain;
 
@@ -54,7 +51,13 @@ export type ProtocolMetadata = {
   description: string;
   versionName: string;
   versionSlug: string;
-  dataSourceDescription: ReactNode;
+  dataSource: {
+    github: {
+      owner: string;
+      repo: string;
+      commitSha: string;
+    };
+  };
   isAvailableUpstream: boolean;
 };
 
@@ -155,22 +158,13 @@ export class ProtocolVersionsModel {
           .sort((a, b) => a.domain.localeCompare(b.domain)),
       } as const;
 
-      const dataSourceDescription = (
-        <>
-          Protocol data is from{' '}
-          <GitHubCommitLink
-            owner={DEVTOOLS_PROTOCOL_REPO_OWNER}
-            repo={DEVTOOLS_PROTOCOL_REPO_NAME}
-            commitSha={this.#devToolsProtocolRepoFetchMetadata.commitSha}
-          />{' '}
-          <GitHubCommitTime
-            owner={DEVTOOLS_PROTOCOL_REPO_OWNER}
-            repo={DEVTOOLS_PROTOCOL_REPO_NAME}
-            commitSha={this.#devToolsProtocolRepoFetchMetadata.commitSha}
-          />
-          .
-        </>
-      );
+      const dataSource = {
+        github: {
+          owner: DEVTOOLS_PROTOCOL_REPO_OWNER,
+          repo: DEVTOOLS_PROTOCOL_REPO_NAME,
+          commitSha: this.#devToolsProtocolRepoFetchMetadata.commitSha,
+        },
+      };
 
       this.#devToolsProtocolsByVersionSlug = new Map([
         [
@@ -181,7 +175,7 @@ export class ProtocolVersionsModel {
               description: '',
               versionName: 'latest (tip-of-tree)',
               versionSlug: 'tot',
-              dataSourceDescription,
+              dataSource,
               isAvailableUpstream: true,
             },
           },
@@ -194,7 +188,7 @@ export class ProtocolVersionsModel {
               description: '',
               versionName: 'v8-inspector (node)',
               versionSlug: 'v8',
-              dataSourceDescription,
+              dataSource,
               isAvailableUpstream: true,
             },
           },
@@ -227,7 +221,7 @@ export class ProtocolVersionsModel {
               description: '',
               versionName: `stable RC (${devToolsBrowserProtocol.version.major}.${devToolsBrowserProtocol.version.minor})`,
               versionSlug: `${devToolsBrowserProtocol.version.major}-${devToolsBrowserProtocol.version.minor}`,
-              dataSourceDescription,
+              dataSource,
               isAvailableUpstream: true,
             },
           },
@@ -248,7 +242,7 @@ NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatic
   `,
               versionName: 'hermes',
               versionSlug: 'hermes',
-              dataSourceDescription,
+              dataSource,
               isAvailableUpstream: false,
             },
           },

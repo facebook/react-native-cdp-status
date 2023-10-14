@@ -25,6 +25,8 @@ export class HermesImplementationModel
     super();
   }
 
+  readonly displayName = 'Hermes';
+
   #files = new Map<string, string>();
   #repoFetchMetadata: {
     owner: string;
@@ -181,18 +183,6 @@ export class HermesImplementationModel
       }
     }
     return references;
-  }
-
-  async getDataSourceDescription() {
-    await this.#fetchData();
-    const { owner, repo, commitSha } = this.#repoFetchMetadata!;
-    return (
-      <>
-        Hermes data is from{' '}
-        <GitHubCommitLink commitSha={commitSha} owner={owner} repo={repo} />{' '}
-        <GitHubCommitTime owner={owner} repo={repo} commitSha={commitSha} />.
-      </>
-    );
   }
 
   async getDataSourceMetadata() {

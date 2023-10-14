@@ -8,7 +8,6 @@ export type ProtocolImplementationData = {
     string,
     Readonly<{
       references: ImplementationProtocolReferences;
-      dataSourceDescription: ReactNode;
     }>
   >;
 };
@@ -30,8 +29,6 @@ export async function getProtocolImplementationData(
                 await implementationModel.extractProtocolReferences(
                   resolvedProtocol,
                 ),
-              dataSourceDescription:
-                await implementationModel.getDataSourceDescription(),
             },
           ] as const,
       ),
