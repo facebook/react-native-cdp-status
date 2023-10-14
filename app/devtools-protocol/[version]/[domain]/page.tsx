@@ -490,7 +490,7 @@ function DomainExternalLinks({
     upstreamVersionSlug,
   )}/${encodeURIComponent(domain)}`;
   return (
-    <div className="float-right">
+    <div className="float-right ml-1">
       <a href={cdpUrl} target="cdp-reference" title="View in CDP docs">
         <Image
           src="/images/chrome-devtools-circle-responsive.svg"
@@ -569,7 +569,7 @@ function MemberExternalLinks({
     kind,
   )}-${encodeURIComponent(memberKey)}`;
   return (
-    <div className="float-right flex-row gap-1 flex">
+    <div className="float-right ml-1 flex-row gap-1 flex">
       <ImplementationLinkForMember
         domain={domain}
         implementationId="hermes"

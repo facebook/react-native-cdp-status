@@ -20,8 +20,8 @@ export default async function Layout({
   const protocolVersions = await protocolVersionsModel.protocolVersions();
   const protocol = await protocolVersion.protocol();
   return (
-    <div>
-      <div className="flex">
+    <div className="min-h-screen flex flex-col">
+      <div className="flex flex-grow">
         <nav className="bg-gray-100 dark:bg-gray-900 w-64 flex-shrink-0">
           <h2 className="font-bold text-lg p-4">Versions</h2>
           <ul className="p-0 list-inside">

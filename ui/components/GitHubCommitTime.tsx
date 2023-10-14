@@ -27,7 +27,7 @@ export async function GitHubCommitTime({
   const commitTime = data.commit.committer!.date!;
   return (
     <span suppressHydrationWarning>
-      <TimeAgo date={commitTime} />
+      <TimeAgo date={commitTime} className="whitespace-nowrap" />
     </span>
   );
 }

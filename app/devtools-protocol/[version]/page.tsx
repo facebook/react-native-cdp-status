@@ -37,9 +37,9 @@ export default async function Page({
           <ProtocolVersionExternalLinks protocolMetadata={metadata} />
         }
       >
-        <Markdown>{metadata.description}</Markdown>
-        <p className="text-xs">{metadata.dataSourceDescription}</p>
-        <p className="text-xs">
+        <Markdown className="mb-2">{metadata.description}</Markdown>
+        <p className="text-xs mb-1">{metadata.dataSourceDescription}</p>
+        <p className="text-xs mb-2">
           {
             protocolImplementationData.referencesByImplementationId.get(
               'hermes',
@@ -68,7 +68,7 @@ function ProtocolVersionExternalLinks({
       )}`
     : null;
   return (
-    <div className="float-right">
+    <div className="float-right ml-1">
       {cdpUrl && (
         <a href={cdpUrl} target="cdp-reference" title="View in CDP docs">
           <Image
@@ -86,7 +86,7 @@ function ProtocolVersionExternalLinks({
 
 function ImplementationStatsHeader() {
   return (
-    <div className="flex flex-row">
+    <div className="lg:flex flex-row hidden">
       <div className="text-sm w-1/6 text-gray-500 dark:text-gray-400">
         Implementation
       </div>
@@ -174,12 +174,17 @@ function ImplementationStats({
   implementationStats.domainCount = referencedDomains.size;
   return (
     <div>
-      {/* percentages */}
-      <div className="flex flex-row">
-        <div className="flex-grow text-2xl font-bold w-1/6">
+      <div className="flex flex-row flex-wrap lg:gap-0 gap-y-2 gap-x-4 justify-start">
+        <div className="text-base font-bold lg:w-1/6 pt-1 w-full">
+          <span className="lg:hidden font-bold text-sm text-gray-500 dark:text-gray-400">
+            Implementation:{' '}
+          </span>
           <ImplementationLink implementationId={implementationId} />
         </div>
-        <div className="flex-grow text-2xl font-bold w-1/6">
+        <div className="text-2xl font-bold lg:w-1/6">
+          <div className="lg:hidden font-normal text-sm text-gray-500 dark:text-gray-400">
+            Coverage
+          </div>
           {Math.round(
             (100 *
               (implementationStats.commandCount +
@@ -191,17 +196,28 @@ function ImplementationStats({
           )}
           %
         </div>
-        {/* domains */}
-        <div className="flex-grow text-2xl font-bold w-1/6">
+        <div className="text-2xl font-bold lg:w-1/6">
+          <div className="lg:hidden font-normal text-sm text-gray-500 dark:text-gray-400">
+            Domains
+          </div>
           {implementationStats.domainCount} / {protocolStats.domainCount}
         </div>
-        <div className="flex-grow text-2xl font-bold w-1/6">
+        <div className="text-2xl font-bold lg:w-1/6">
+          <div className="lg:hidden font-normal text-sm text-gray-500 dark:text-gray-400">
+            Commands
+          </div>
           {implementationStats.commandCount} / {protocolStats.commandCount}
         </div>
-        <div className="flex-grow text-2xl font-bold w-1/6">
+        <div className="text-2xl font-bold lg:w-1/6">
+          <div className="lg:hidden font-normal text-sm text-gray-500 dark:text-gray-400">
+            Events
+          </div>
           {implementationStats.eventCount} / {protocolStats.eventCount}
         </div>
-        <div className="flex-grow text-2xl font-bold w-1/6">
+        <div className="text-2xl font-bold lg:w-1/6">
+          <div className="lg:hidden font-normal text-sm text-gray-500 dark:text-gray-400">
+            Types
+          </div>
           {implementationStats.typeCount} / {protocolStats.typeCount}
         </div>
       </div>
@@ -217,17 +233,17 @@ function ImplementationLink({
   switch (implementationId) {
     case 'hermes': {
       return (
-        <span className="font-light">
+        <>
+          Hermes{' '}
           <Image
             src="/images/hermes-logo.svg"
-            width={24}
-            height={24}
+            width={20}
+            height={20}
             alt=""
             title="Hermes CDPHandler"
-            className="inline-block"
-          />{' '}
-          Hermes
-        </span>
+            className="inline-block mb-1"
+          />
+        </>
       );
     }
     default:
