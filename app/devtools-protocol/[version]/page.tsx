@@ -10,6 +10,9 @@ import { useMemo } from 'react';
 import Image from 'next/image';
 import { Markdown } from '@/ui/components/Markdown';
 import { notFound } from 'next/navigation';
+import { implementationModelsById } from '@/data/implementations';
+import { ImplementationModel } from '@/data/ImplementationModel';
+import { GitHubCommitLink } from '@/ui/components/GitHubCommitLink';
 
 export default async function Page({
   params: { version },
@@ -49,6 +52,7 @@ export default async function Page({
         <ImplementationStatsHeader />
         <ImplementationStats
           implementationId="hermes"
+          implementation={implementationModelsById.get('hermes')!}
           protocol={protocol.protocol}
           protocolImplementationData={protocolImplementationData}
         />
@@ -110,10 +114,12 @@ function ImplementationStatsHeader() {
 }
 
 function ImplementationStats({
+  implementation,
   implementationId,
   protocol,
   protocolImplementationData,
 }: {
+  implementation: ImplementationModel;
   implementationId: string;
   protocol: IProtocol;
   protocolImplementationData: ProtocolImplementationData;
@@ -179,7 +185,10 @@ function ImplementationStats({
           <span className="lg:hidden font-bold text-sm text-gray-500 dark:text-gray-400">
             Implementation:{' '}
           </span>
-          <ImplementationLink implementationId={implementationId} />
+          <ImplementationLink
+            implementationId={implementationId}
+            implementation={implementation}
+          />
         </div>
         <div className="text-2xl font-bold lg:w-1/6">
           <div className="lg:hidden font-normal text-sm text-gray-500 dark:text-gray-400">
@@ -225,14 +234,18 @@ function ImplementationStats({
   );
 }
 
-function ImplementationLink({
+async function ImplementationLink({
+  implementation,
   implementationId,
 }: {
+  implementation: ImplementationModel;
   implementationId: string;
 }) {
+  const dataSourceMetadata = await implementation.getDataSourceMetadata();
+  let linkContents;
   switch (implementationId) {
-    case 'hermes': {
-      return (
+    case 'hermes':
+      linkContents = (
         <>
           Hermes{' '}
           <Image
@@ -245,10 +258,20 @@ function ImplementationLink({
           />
         </>
       );
-    }
+      break;
+
     default:
-      return <span>{implementationId}</span>;
+      linkContents = <span>{implementationId}</span>;
+      break;
   }
+  if (dataSourceMetadata.github) {
+    return (
+      <GitHubCommitLink {...dataSourceMetadata.github}>
+        {linkContents}
+      </GitHubCommitLink>
+    );
+  }
+  return linkContents;
 }
 
 export async function generateStaticParams() {

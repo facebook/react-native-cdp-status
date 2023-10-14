@@ -1,34 +1,34 @@
 import { IProtocol, Protocol } from '@/third-party/protocol-schema';
 import { ProtocolModel } from './ProtocolModel';
 
+type ReferenceLocation = {
+  match: string;
+  index: number;
+  length: number;
+  // 1-based
+  line: number;
+  // 1-based
+  column: number;
+  github?: {
+    owner: string;
+    repo: string;
+    commitSha: string;
+    path: string;
+  };
+};
+
 export type ImplementationProtocolReferences = {
-  commands: Record<
-    string,
-    {
-      path: string;
-      match: string;
-      index: number;
-      length: number;
-    }[]
-  >;
-  events: Record<
-    string,
-    {
-      path: string;
-      match: string;
-      index: number;
-      length: number;
-    }[]
-  >;
-  types: Record<
-    string,
-    {
-      path: string;
-      match: string;
-      index: number;
-      length: number;
-    }[]
-  >;
+  commands: Record<string, ReferenceLocation[]>;
+  events: Record<string, ReferenceLocation[]>;
+  types: Record<string, ReferenceLocation[]>;
+};
+
+export type DataSourceMetadata = {
+  github?: {
+    owner: string;
+    repo: string;
+    commitSha: string;
+  };
 };
 
 export interface ImplementationModel {
@@ -37,11 +37,16 @@ export interface ImplementationModel {
   ): Promise<ImplementationProtocolReferences>;
   filterProtocol(protocol: IProtocol): Promise<IProtocol>;
   getDataSourceDescription(): Promise<JSX.Element>;
+  getDataSourceMetadata(): Promise<DataSourceMetadata>;
 }
 export abstract class ImplementationModelBase implements ImplementationModel {
   abstract extractProtocolReferences(
     protocol: IProtocol,
   ): Promise<ImplementationProtocolReferences>;
+
+  async getDataSourceMetadata(): Promise<DataSourceMetadata> {
+    return {};
+  }
 
   // Return a protocol with only the commands, events, and types that are
   // (directly or transitively) referenced by this implementation.

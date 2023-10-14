@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "escape-string-regexp": "^5.0.0",
+    "line-column": "^1.0.2",
     "next": "13.5.4",
     "npm-registry-fetch": "^16.1.0",
     "octokit": "^3.1.1",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.10",
+    "@types/line-column": "^1.0.0",
     "@types/node": "^20",
     "@types/npm-registry-fetch": "^8.0.5",
     "@types/react": "^18",

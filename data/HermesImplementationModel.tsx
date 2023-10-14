@@ -5,10 +5,10 @@ import {
   ImplementationProtocolReferences,
 } from './ImplementationModel';
 import { IProtocol } from '@/third-party/protocol-schema';
-import { ReactNode } from 'react';
 import { octokit } from './github/octokit';
 import { fetchWithOptions } from './fetchWithOptions';
 import { GitHubCommitTime } from '@/ui/components/GitHubCommitTime';
+import lineColumn from 'line-column';
 
 const CDP_HANDLER_CPP = 'API/hermes/inspector/chrome/CDPHandler.cpp';
 const MESSAGE_TYPES_H = 'API/hermes/inspector/chrome/MessageTypes.h';
@@ -118,13 +118,22 @@ export class HermesImplementationModel
       );
       for (const path of pathsToSearch) {
         const file = this.#files.get(path)!;
+        const lc = lineColumn(file);
         for (const match of file.matchAll(regex)) {
           obj[name] = obj[name] ?? [];
+          const { line, col } = lc.fromIndex(match.index!)!;
           obj[name].push({
-            path,
+            github: {
+              owner: HERMES_REPO_OWNER,
+              repo: HERMES_REPO_NAME,
+              commitSha: this.#repoFetchMetadata!.commitSha,
+              path,
+            },
             match: match[0],
             index: match.index!,
             length: match[0].length,
+            line,
+            column: col,
           });
         }
       }
@@ -184,6 +193,18 @@ export class HermesImplementationModel
         <GitHubCommitTime owner={owner} repo={repo} commitSha={commitSha} />.
       </>
     );
+  }
+
+  async getDataSourceMetadata() {
+    await this.#fetchData();
+    const { owner, repo, commitSha } = this.#repoFetchMetadata!;
+    return {
+      github: {
+        owner,
+        repo,
+        commitSha,
+      },
+    };
   }
 }
 
