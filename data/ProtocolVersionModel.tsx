@@ -15,6 +15,7 @@ export type ProtocolVersionMetadata = {
       owner: string;
       repo: string;
       commitSha: string;
+      path?: string;
     };
   };
   isAvailableUpstream: boolean;

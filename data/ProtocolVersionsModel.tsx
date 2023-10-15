@@ -42,9 +42,10 @@ export class ProtocolVersionsModel {
     this.#loadDataPromise = (async () => {
       this.#devToolsProtocolRepoFetchMetadata = {
         devToolsCommitSha: await getHeadCommitSha(DEVTOOLS_PROTOCOL_REPO),
-        devToolsProtocolViewerCommitSha: await getHeadCommitSha(
-          DEVTOOLS_PROTOCOL_VIEWER_REPO,
-        ),
+        devToolsProtocolViewerCommitSha: await getLatestCommitForFile({
+          ...DEVTOOLS_PROTOCOL_VIEWER_REPO,
+          path: 'pages/_data/1-2.json',
+        }),
       };
 
       // TODO: Validate that the fetched data matches the protocol schema
@@ -87,6 +88,7 @@ export class ProtocolVersionsModel {
                   repo: DEVTOOLS_PROTOCOL_REPO.repo,
                   commitSha:
                     this.#devToolsProtocolRepoFetchMetadata.devToolsCommitSha,
+                  path: 'json/',
                 },
               },
               isAvailableUpstream: true,
@@ -107,6 +109,7 @@ export class ProtocolVersionsModel {
                   repo: DEVTOOLS_PROTOCOL_REPO.repo,
                   commitSha:
                     this.#devToolsProtocolRepoFetchMetadata.devToolsCommitSha,
+                  path: 'json/',
                 },
               },
               isAvailableUpstream: true,
@@ -127,6 +130,7 @@ export class ProtocolVersionsModel {
                   repo: DEVTOOLS_PROTOCOL_REPO.repo,
                   commitSha:
                     this.#devToolsProtocolRepoFetchMetadata.devToolsCommitSha,
+                  path: 'json/',
                 },
               },
               isAvailableUpstream: true,
@@ -139,12 +143,6 @@ export class ProtocolVersionsModel {
             protocol: async () => {
               return sortProtocolDomainsAndMembers(
                 JSON.parse(
-                  // TODO: Cache this for longer as the 1.2 data is unlikely to change
-                  // e.g. instead of querying for HEAD, we can ask GitHub for the latest
-                  // commit that affected 1-2.json and read that. This would also make
-                  // for a more informative commit hash and timestamp.
-                  // We can also consider doing the same for 1.3 actually, rather than
-                  // rederiving it from tot.
                   await fetchFileFromGitHub({
                     owner: DEVTOOLS_PROTOCOL_VIEWER_REPO.owner,
                     repo: DEVTOOLS_PROTOCOL_VIEWER_REPO.repo,
@@ -166,7 +164,7 @@ export class ProtocolVersionsModel {
                   commitSha:
                     this.#devToolsProtocolRepoFetchMetadata
                       .devToolsProtocolViewerCommitSha,
-                  // TODO: Record the path here and generate a direct link to the file.
+                  path: 'pages/_data/1-2.json',
                 },
               },
               isAvailableUpstream: true,
@@ -195,6 +193,7 @@ NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatic
                   repo: DEVTOOLS_PROTOCOL_REPO.repo,
                   commitSha:
                     this.#devToolsProtocolRepoFetchMetadata.devToolsCommitSha,
+                  path: 'json/',
                 },
               },
               isAvailableUpstream: false,
@@ -369,4 +368,34 @@ async function fetchFileFromGitHub({
     },
   });
   return data as any;
+}
+
+async function getLatestCommitForFile({
+  owner,
+  repo,
+  path,
+  branch,
+}: {
+  owner: string;
+  repo: string;
+  path: string;
+  branch: string;
+}): Promise<string> {
+  const {
+    data: [commit],
+  } = await octokit.rest.repos.listCommits({
+    owner,
+    repo,
+    path,
+    per_page: 1,
+    ref: branch,
+    request: {
+      fetch: fetchWithOptions({
+        next: {
+          revalidate: 3 * 3600, // 3 hours
+        },
+      }),
+    },
+  });
+  return commit.sha;
 }

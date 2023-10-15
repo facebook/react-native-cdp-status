@@ -5,16 +5,20 @@ export function GitHubCommitLink({
   owner,
   repo,
   commitSha,
+  path,
   children,
 }: {
   owner: string;
   repo: string;
   commitSha: string;
+  path?: string;
   children?: React.ReactNode;
 }) {
-  const url = `https://github.com/${encodeURIComponent(
-    owner,
-  )}/${encodeURIComponent(repo)}/tree/${encodeURIComponent(commitSha)}`;
+  const url =
+    `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(
+      repo,
+    )}/${path != null ? 'blob' : 'tree'}/${encodeURIComponent(commitSha)}` +
+    (path != null ? `/${encodeURI(path)}` : '');
   if (children) {
     return (
       <a href={url} target="_blank">
