@@ -225,7 +225,7 @@ NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatic
       return null;
     }
 
-    const model = new ProtocolVersionModel(protocolVersion);
+    const model = new ProtocolVersionModel(protocolVersion, versionSlug);
     this.#protocolVersionBySlug.set(versionSlug, model);
     return model;
   }

@@ -23,9 +23,11 @@ export type ProtocolVersionMetadata = {
 
 export class ProtocolVersionModel {
   protocolVersion: ProtocolVersion;
+  versionSlug: string;
 
-  constructor(protocolVersion: ProtocolVersion) {
+  constructor(protocolVersion: ProtocolVersion, versionSlug: string) {
     this.protocolVersion = protocolVersion;
+    this.versionSlug = versionSlug;
   }
 
   #protocol = null as null | Promise<ProtocolModel>;
