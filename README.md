@@ -4,7 +4,7 @@ Generates [documentation](https://cdpstatus.reactnative.dev/) showing the progre
 
 ## ✈️ Getting started
 
-Create a Github [personal access token](https://github.com/settings/tokens/new) with `public_repo` permissions. We use this to check the current state of the [React Native](https://github.com/facebook/react-native), [Hermes](https://github.com/facebook/hermes/) and [Chrome DevTools Protocol](https://github.com/ChromeDevTools/devtools-protocol) projects.
+Create a Github [personal access token](https://github.com/settings/tokens/new?description=React%20Native%20CDP%20Status&scopes=public_repo) with `public_repo` permissions. We use this to check the current state of the [React Native](https://github.com/facebook/react-native), [Hermes](https://github.com/facebook/hermes/) and [Chrome DevTools Protocol](https://github.com/ChromeDevTools/devtools-protocol) projects.
 
 ```bash
 export GITHUB_TOKEN=<your token>
