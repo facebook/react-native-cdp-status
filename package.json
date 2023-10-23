@@ -20,7 +20,8 @@
     "react-timeago": "^7.2.0",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1",
-    "sass": "^1.69.3"
+    "sass": "^1.69.3",
+    "eslint-plugin-cdp-project": "file:./eslint/rules"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.10",
@@ -30,10 +31,13 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-timeago": "^4.1.4",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
     "autoprefixer": "^10",
     "eslint": "^8",
     "eslint-config-next": "13.5.4",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.33.2",
     "husky": "^8.0.3",
     "lint-staged": "^14.0.1",
     "postcss": "^8",
