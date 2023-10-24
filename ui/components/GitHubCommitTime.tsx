@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import { fetchWithOptions } from '@/data/fetchWithOptions';
 import { octokit } from '@/data/github/octokit';
 import TimeAgo from '@/ui/shims/react-timeago';
