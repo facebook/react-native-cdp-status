@@ -17,7 +17,7 @@ export function ExternalLink({
   children: ReactNode;
 }) {
   return (
-    <a href={href} className={(className.length > 0 ? `${className} ` : '') + "text-blue-600 hover:underline"}>
+    <a href={href} className={`${className} text-blue-600 hover:underline`}>
       {children}
       <ExternalLinkIcon />
     </a>
