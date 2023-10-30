@@ -21,7 +21,7 @@ export function Footer() {
         license.
       </span>
       <span className="font-bold">
-        Copyright ©  Meta Platforms, Inc
+        Copyright © Meta Platforms, Inc
       </span>
       <span className="flex space-x-2">
         <ExternalLink href="https://opensource.fb.com/legal/terms" className="whitespace-nowrap">
