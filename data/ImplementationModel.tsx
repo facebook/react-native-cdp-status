@@ -8,26 +8,34 @@
 import { IProtocol, Protocol } from '@/third-party/protocol-schema';
 import { ProtocolModel } from './ProtocolModel';
 
-type ReferenceLocation = {
-  match: string;
-  index: number;
-  length: number;
+export type ReferenceLocation = ReferenceFile & {
+  // match: string;
+  // index: number;
+  // length: number;
   // 1-based
   line: number;
   // 1-based
   column: number;
+}
+
+export type ReferenceFile = {
   github?: {
     owner: string;
     repo: string;
     commitSha: string;
     path: string;
   };
+}
+
+export type ReferenceComment = ReferenceLocation & {
+  comment: string;
+  isContentfulComment: boolean;
 };
 
 export type ImplementationProtocolReferences = {
-  commands: Record<string, ReferenceLocation[]>;
-  events: Record<string, ReferenceLocation[]>;
-  types: Record<string, ReferenceLocation[]>;
+  commands: Record<string, (ReferenceLocation | ReferenceComment)[]>;
+  events: Record<string, (ReferenceLocation | ReferenceComment)[]>;
+  types: Record<string, (ReferenceLocation | ReferenceComment)[]>;
 };
 
 export type DataSourceMetadata = {

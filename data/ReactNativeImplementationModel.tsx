@@ -15,8 +15,13 @@ import { IProtocol } from '@/third-party/protocol-schema';
 import { octokit } from './github/octokit';
 import { fetchWithOptions } from './fetchWithOptions';
 import lineColumn from 'line-column';
+import {
+  ParsedAndIndexedCdpComments,
+  parseAndIndexCdpComments,
+} from './CdpComments';
 
-const JSINSPECTOR_MODERN_DIR = 'packages/react-native/ReactCommon/jsinspector-modern';
+const JSINSPECTOR_MODERN_DIR =
+  'packages/react-native/ReactCommon/jsinspector-modern';
 
 const REACT_NATIVE_REPO_OWNER = 'facebook';
 const REACT_NATIVE_REPO_NAME = 'react-native';
@@ -40,10 +45,13 @@ export class ReactNativeImplementationModel
     commitSha: string;
   } | null = null;
   #fetchDataPromise: Promise<void> | undefined;
+  #indexedCdpComments: ParsedAndIndexedCdpComments | undefined;
 
-  async #listDirectory(path: string): Promise<{
-    path: string;
-  }[]> {
+  async #listDirectory(path: string): Promise<
+    {
+      path: string;
+    }[]
+  > {
     const { owner, repo, commitSha } = this.#repoFetchMetadata!;
 
     const { data } = await octokit.rest.repos.getContent({
@@ -128,10 +136,30 @@ export class ReactNativeImplementationModel
             commitSha: latestCommitSha,
           };
         }
-        this.#jsinspectorSourcePaths = (await this.#listDirectory(JSINSPECTOR_MODERN_DIR))
-          .filter(file => file.path.endsWith('.cpp') || file.path.endsWith('.h')).map(file => file.path);
+        this.#jsinspectorSourcePaths = (
+          await this.#listDirectory(JSINSPECTOR_MODERN_DIR)
+        )
+          .filter(
+            (file) => file.path.endsWith('.cpp') || file.path.endsWith('.h'),
+          )
+          .map((file) => file.path);
         await Promise.all(
           this.#jsinspectorSourcePaths.map((path) => this.#fetchFile(path)),
+        );
+        this.#indexedCdpComments = parseAndIndexCdpComments(
+          this.#jsinspectorSourcePaths.map((path) => {
+            return [
+              {
+                github: {
+                  owner: REACT_NATIVE_REPO_OWNER,
+                  repo: REACT_NATIVE_REPO_NAME,
+                  commitSha: this.#repoFetchMetadata!.commitSha,
+                  path,
+                },
+              },
+              this.#files.get(path)!,
+            ];
+          }),
         );
       } catch (e) {
         this.#fetchDataPromise = undefined;
@@ -175,17 +203,40 @@ export class ReactNativeImplementationModel
               commitSha: this.#repoFetchMetadata!.commitSha,
               path,
             },
-            match: match[0],
-            index: match.index!,
-            length: match[0].length,
+            // match: match[0],
+            // index: match.index!,
+            // length: match[0].length,
             line,
             column: col,
           });
         }
       }
     };
+    const findAndPushCommentMentions = (
+      obj: typeof references.commands | typeof references.events,
+      name: string,
+    ) => {
+      const comments = this.#indexedCdpComments!.commentsByCdpSymbol.get(name);
+      if (!comments) {
+        return;
+      }
+      for (const comment of comments) {
+        obj[name] = obj[name] ?? [];
+        obj[name].push({
+          github: comment.github,
+          line: comment.line,
+          column: comment.column,
+          comment: comment.cleanedText,
+          isContentfulComment: comment.hasAdditionalContent,
+        });
+      }
+    };
     for (const domain of protocol.domains) {
       for (const command of domain.commands ?? []) {
+        findAndPushCommentMentions(
+          references.commands,
+          `${domain.domain}.${command.name}`,
+        );
         const stringLiteral = quoteCppString(
           `${domain.domain}.${command.name}`,
         );
@@ -198,11 +249,21 @@ export class ReactNativeImplementationModel
       }
       for (const event of domain.events ?? []) {
         const stringLiteral = quoteCppString(`${domain.domain}.${event.name}`);
+        findAndPushCommentMentions(
+          references.events,
+          `${domain.domain}.${event.name}`,
+        );
         findAndPushMatches(
           this.#jsinspectorSourcePaths,
           references.events,
           `${domain.domain}.${event.name}`,
           [stringLiteral],
+        );
+      }
+      for (const type of domain.types ?? []) {
+        findAndPushCommentMentions(
+          references.types,
+          `${domain.domain}.${type.id}`,
         );
       }
     }

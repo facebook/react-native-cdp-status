@@ -14,6 +14,7 @@ import { DomainMemberParameters } from './DomainMemberParameters';
 import { DomainMethodReturnObject } from './DomainMethodReturnObject';
 import { DomainMemberHeading } from './DomainMemberHeading';
 import { Protocol } from '@/third-party/protocol-schema';
+import { DomainMemberExternalComments } from './DomainMemberExternalComments';
 
 export function DomainMethodsCard({
   domain,
@@ -44,6 +45,12 @@ export function DomainMethodsCard({
                 protocolMetadata={protocolMetadata}
               />
               <DomainMemberDescription member={command} />
+              <DomainMemberExternalComments
+                kind="method"
+                memberKey={command.name}
+                domain={domain.domain}
+                protocolImplementationData={protocolImplementationData}
+                protocolMetadata={protocolMetadata} />
               <DomainMemberParameters
                 member={command}
                 domain={domain.domain}
