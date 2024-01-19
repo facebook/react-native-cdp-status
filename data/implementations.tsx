@@ -6,12 +6,17 @@
  */
 
 import { HermesImplementationModel } from './HermesImplementationModel';
-import { IProtocol } from '@/third-party/protocol-schema';
-import { ImplementationModel } from './ImplementationModel';
+import { ImplementationModel, MergedImplementationModel } from './ImplementationModel';
+import { ReactNativeImplementationModel } from './ReactNativeImplementationModel';
+
+const hermesImplementationModel = new HermesImplementationModel();
+const reactNativeImplementationModel = new ReactNativeImplementationModel();
 
 export const implementationModelsById: ReadonlyMap<
   string,
   ImplementationModel
 > = new Map<string, ImplementationModel>([
-  ['hermes', new HermesImplementationModel()],
+  ['hermes', hermesImplementationModel],
+  ['react-native', reactNativeImplementationModel],
+  ['react-native-hermes', new MergedImplementationModel([reactNativeImplementationModel, hermesImplementationModel])],
 ]);
