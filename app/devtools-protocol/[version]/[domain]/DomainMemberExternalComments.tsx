@@ -70,14 +70,14 @@ function CommentSourceLink({
     return (
       <div
         className="
-      text-xs
-      text-gray-500
-      flex-row
-      gap-1
-      flex
-      items-center
-      justify-end
-    "
+          text-xs
+          text-gray-500
+          dark:text-gray-400
+          flex-row
+          flex
+          items-center
+          justify-end
+        "
       >
         <GitHubLineLink
           owner={comment.github.owner}
@@ -131,6 +131,7 @@ function DomainMemberExternalCommentsForImplementation({
         <div key={index}>
           <div
             className="bg-gray-100
+            dark:bg-gray-700
             border border-gray-300
             rounded
             p-2
@@ -172,7 +173,7 @@ export function DomainMemberExternalComments({
     kind,
   )}-${encodeURIComponent(memberKey)}`;
   return (
-    <div className="flex-col gap-2 flex">
+    <div className="flex-col gap-4 flex">
       <DomainMemberExternalCommentsForImplementation
         domain={domain}
         implementationId="react-native-hermes"
