@@ -15,6 +15,7 @@ import { DomainMemberDescription } from './DomainMemberDescription';
 import { TypeProperties } from './TypeProperties';
 import { DomainMemberHeading } from './DomainMemberHeading';
 import { Protocol } from '@/third-party/protocol-schema';
+import { DomainMemberExternalComments } from './DomainMemberExternalComments';
 
 export function DomainTypesCard({
   domain,
@@ -52,6 +53,12 @@ export function DomainTypesCard({
                 />
               </p>
               <TypeDetail type={type} />
+              <DomainMemberExternalComments
+                kind="type"
+                memberKey={type.id}
+                domain={domain.domain}
+                protocolImplementationData={protocolImplementationData}
+                protocolMetadata={protocolMetadata} />
               <TypeProperties
                 type={type}
                 domain={domain.domain}

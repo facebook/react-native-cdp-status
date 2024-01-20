@@ -13,6 +13,7 @@ import { DomainMemberDescription } from './DomainMemberDescription';
 import { DomainMemberParameters } from './DomainMemberParameters';
 import { DomainMemberHeading } from './DomainMemberHeading';
 import { Protocol } from '@/third-party/protocol-schema';
+import { DomainMemberExternalComments } from './DomainMemberExternalComments';
 
 export function DomainEventsCard({
   domain,
@@ -43,6 +44,12 @@ export function DomainEventsCard({
                 protocolMetadata={protocolMetadata}
               />
               <DomainMemberDescription member={event} />
+              <DomainMemberExternalComments
+                kind="event"
+                memberKey={event.name}
+                domain={domain.domain}
+                protocolImplementationData={protocolImplementationData}
+                protocolMetadata={protocolMetadata} />
               <DomainMemberParameters
                 member={event}
                 domain={domain.domain}
