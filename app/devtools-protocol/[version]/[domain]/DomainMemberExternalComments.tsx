@@ -163,7 +163,7 @@ export function DomainMemberExternalComments({
     <div className="flex-col gap-4 flex">
       <DomainMemberExternalCommentsForImplementation
         domain={domain}
-        implementationId="react-native-hermes"
+        implementationId="react-native"
         kind={kind}
         memberKey={memberKey}
         protocolImplementationData={protocolImplementationData}
