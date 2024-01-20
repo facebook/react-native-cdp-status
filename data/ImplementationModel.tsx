@@ -9,9 +9,6 @@ import { IProtocol, Protocol } from '@/third-party/protocol-schema';
 import { ProtocolModel } from './ProtocolModel';
 
 export type ReferenceLocation = ReferenceFile & {
-  // match: string;
-  // index: number;
-  // length: number;
   // 1-based
   line: number;
   // 1-based

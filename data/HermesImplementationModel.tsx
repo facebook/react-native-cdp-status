@@ -137,9 +137,6 @@ export class HermesImplementationModel
               commitSha: this.#repoFetchMetadata!.commitSha,
               path,
             },
-            // match: match[0],
-            // index: match.index!,
-            // length: match[0].length,
             line,
             column: col,
           });
