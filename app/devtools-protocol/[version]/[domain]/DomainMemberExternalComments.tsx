@@ -54,20 +54,22 @@ function CommentImplementationIcon({
           className="inline-block mb-1"
         />
       );
-    default: 
-      return <>{implementationId}</>
+    default:
+      return <>{implementationId}</>;
   }
 }
 
 function CommentSourceLink({
   comment,
-  implementationId
-}:{
-  comment: ReferenceComment,
-  implementationId: string
+  implementationId,
+}: {
+  comment: ReferenceComment;
+  implementationId: string;
 }) {
-  if (comment.github)  {
-    return <div className="
+  if (comment.github) {
+    return (
+      <div
+        className="
       text-xs
       text-gray-500
       flex-row
@@ -75,18 +77,21 @@ function CommentSourceLink({
       flex
       items-center
       justify-end
-    ">
-      <GitHubLineLink
-      owner={comment.github.owner}
-      repo={comment.github.repo}
-      line={comment.line}
-      commitRef={comment.github.commitSha}
-      path={comment.github.path}
-    ><CommentImplementationIcon implementationId={implementationId} />
-    {' '}
-    {comment.github.owner}/{comment.github.repo}/…/{getFileName(comment.github.path)}:{comment.line}
-    </GitHubLineLink>
-    </div>;
+    "
+      >
+        <GitHubLineLink
+          owner={comment.github.owner}
+          repo={comment.github.repo}
+          line={comment.line}
+          commitRef={comment.github.commitSha}
+          path={comment.github.path}
+        >
+          <CommentImplementationIcon implementationId={implementationId} />{' '}
+          {comment.github.owner}/{comment.github.repo}/…/
+          {getFileName(comment.github.path)}:{comment.line}
+        </GitHubLineLink>
+      </div>
+    );
   }
 }
 
@@ -116,7 +121,7 @@ function DomainMemberExternalCommentsForImplementation({
       'comment' in reference &&
       reference.comment != null &&
       reference.isContentfulComment,
-  ) as ReferenceComment[] ;
+  ) as ReferenceComment[];
   if (!contentfulCommentReferences.length) {
     return null;
   }
@@ -124,17 +129,19 @@ function DomainMemberExternalCommentsForImplementation({
     <>
       {contentfulCommentReferences.map((reference, index) => (
         <div key={index}>
-          <div className="bg-gray-100
+          <div
+            className="bg-gray-100
             border border-gray-300
             rounded
             p-2
             text-sm
-            break-words">
+            break-words"
+          >
             <Markdown className="font-mono">{reference.comment}</Markdown>
             <CommentSourceLink
               comment={reference}
               implementationId={implementationId}
-             />
+            />
           </div>
         </div>
       ))}
@@ -177,7 +184,6 @@ export function DomainMemberExternalComments({
     </div>
   );
 }
-
 
 function getFileName(path: string) {
   const parts = path.split('/');

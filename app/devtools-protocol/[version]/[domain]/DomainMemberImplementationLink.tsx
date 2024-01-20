@@ -52,7 +52,7 @@ export function DomainMemberImplementationLink({
       linkContents = (
         <Image
           src="/images/react-native-logo.svg"
-          width={(small ? 20 : 24)}
+          width={small ? 20 : 24}
           height={small ? 20 : 24}
           alt="React Native"
           title="Referenced in React Native"
@@ -65,7 +65,7 @@ export function DomainMemberImplementationLink({
       linkContents = (
         <Image
           src="/images/react-native-logo.svg"
-          width={(small ? 20 : 24)}
+          width={small ? 20 : 24}
           height={small ? 20 : 24}
           alt="React Native"
           title="Referenced in React Native / Hermes"
