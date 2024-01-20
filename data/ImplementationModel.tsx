@@ -18,14 +18,14 @@ export type ReferenceLocation = ReferenceFile & {
   column: number;
 }
 
-export type ReferenceFile = {
-  github?: {
+export type ReferenceFile = Readonly<{
+  github?: Readonly<{
     owner: string;
     repo: string;
     commitSha: string;
     path: string;
-  };
-}
+  }>;
+}>
 
 export type ReferenceComment = ReferenceLocation & {
   comment: string;

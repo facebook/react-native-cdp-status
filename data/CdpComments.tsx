@@ -115,7 +115,7 @@ export type ParsedAndIndexedCdpComments = {
   commentsByCdpSymbol: Map<string, Array<CdpComment & ReferenceFile>>;
 };
 
-export function parseAndIndexCdpComments(files: Iterable<[ReferenceFile, string]>): ParsedAndIndexedCdpComments {
+export function parseAndIndexCdpComments(files: Iterable<readonly [ReferenceFile, string]>): ParsedAndIndexedCdpComments {
   const commentsByCdpSymbol = new Map<string, Array<CdpComment & ReferenceFile>>();
   for (const [file, code] of files) {
     const comments = parseCdpComments(code);
