@@ -49,7 +49,7 @@ export function DomainEventsCard({
                 memberKey={event.name}
                 domain={domain.domain}
                 protocolImplementationData={protocolImplementationData}
-                protocolMetadata={protocolMetadata} />
+              />
               <DomainMemberParameters
                 member={event}
                 domain={domain.domain}

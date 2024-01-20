@@ -58,7 +58,7 @@ export function DomainTypesCard({
                 memberKey={type.id}
                 domain={domain.domain}
                 protocolImplementationData={protocolImplementationData}
-                protocolMetadata={protocolMetadata} />
+              />
               <TypeProperties
                 type={type}
                 domain={domain.domain}

@@ -100,14 +100,12 @@ function DomainMemberExternalCommentsForImplementation({
   memberKey,
   domain,
   protocolImplementationData,
-  protocolMetadata,
   implementationId,
 }: {
   kind: 'method' | 'event' | 'type';
   memberKey: string;
   domain: string;
   protocolImplementationData: ProtocolImplementationData;
-  protocolMetadata: ProtocolVersionMetadata;
   implementationId: string;
 }) {
   const references =
@@ -155,23 +153,12 @@ export function DomainMemberExternalComments({
   memberKey,
   domain,
   protocolImplementationData,
-  protocolMetadata,
 }: {
   kind: 'method' | 'event' | 'type';
   memberKey: string;
   domain: string;
   protocolImplementationData: ProtocolImplementationData;
-  protocolMetadata: ProtocolVersionMetadata;
 }) {
-  const upstreamVersionSlug = protocolMetadata.isAvailableUpstream
-    ? protocolMetadata.versionSlug
-    : 'tot';
-  // TODO: Check against our local copy of the `tot` version to see if this particular member is available.
-  const cdpUrl = `https://chromedevtools.github.io/devtools-protocol/${encodeURIComponent(
-    upstreamVersionSlug,
-  )}/${encodeURIComponent(domain)}#${encodeURIComponent(
-    kind,
-  )}-${encodeURIComponent(memberKey)}`;
   return (
     <div className="flex-col gap-4 flex">
       <DomainMemberExternalCommentsForImplementation
@@ -180,7 +167,6 @@ export function DomainMemberExternalComments({
         kind={kind}
         memberKey={memberKey}
         protocolImplementationData={protocolImplementationData}
-        protocolMetadata={protocolMetadata}
       />
     </div>
   );

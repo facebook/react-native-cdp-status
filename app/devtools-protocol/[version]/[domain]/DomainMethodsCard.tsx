@@ -50,7 +50,7 @@ export function DomainMethodsCard({
                 memberKey={command.name}
                 domain={domain.domain}
                 protocolImplementationData={protocolImplementationData}
-                protocolMetadata={protocolMetadata} />
+              />
               <DomainMemberParameters
                 member={command}
                 domain={domain.domain}
