@@ -56,13 +56,14 @@ function cleanCommentSource(comment: string) {
   // Remove block comment start/end tokens
   comment = comment.replace(/^\/\*\*?/, '').replace(/\*\/$/, '')
     // Remove line comment start tokens
-    .replace(/^\/\/\s*/, '')
+    .replace(/^\s*\/\/\s*/gm, '')
     // Remove leading asterisks from each line
     .replace(/^\s*\* ?/gm, '')
     // Remove leading/trailing newlines
     .replace(/^\n|\n$/g, '')
-    // Remove single newlines (but not double newlines)
-    .replace(/([^\n])\n([^\n])/g, '$1 $2');
+    // Remove trailing whitespace from all lines
+    .replace(/[ \t]+$/gm, '')
+    ;
   // Find and trim the minimum leading whitespace on any non-empty line
   let minLeadingWhitespace = Infinity;
   const lines = comment.split('\n');

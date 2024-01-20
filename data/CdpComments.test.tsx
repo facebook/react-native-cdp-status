@@ -20,9 +20,10 @@ describe('CdpComments', () => {
 /* @cdp symbol1 is mentioned in this block comment */
 /**
  * This is a multiline comment
- * that also mention @cdp symbol1
+ * that also mentions @cdp symbol1
  */
 const x = 10; // This is an inline @cdp symbol1 comment
+const y = 20; // This is another inline @cdp symbol1 comment
 /**
  * This is a multiline comment
  * with two lines
@@ -33,6 +34,19 @@ const x = 10; // This is an inline @cdp symbol1 comment
 // @cdp symbol2
 
 // separate comment @cdp symbol2
+
+/**
+ * @cdp symbol1
+ * - embedded markdown
+ *   - nested
+ */
+
+      /**
+       * @cdp Domain.method
+       * note that the comment is indented
+       */
+
+'@cdp tags outside of comments are ignored';
 `]] as const;
 
   test('parseAndIndexCdpComments', () => {
