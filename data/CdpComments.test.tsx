@@ -47,6 +47,9 @@ const y = 20; // This is another inline @cdp symbol1 comment
        */
 
 '@cdp tags outside of comments are ignored';
+
+// @cdp symbol1
+'NOTE: the comment above has no additional content'
 `]] as const;
 
   test('parseAndIndexCdpComments', () => {

@@ -110,6 +110,18 @@ symbol1
         "hasAdditionalContent": true,
         "line": 21,
       },
+      {
+        "cleanedText": "symbol1",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": false,
+        "line": 33,
+      },
     ],
     "symbol2" => [
       {
