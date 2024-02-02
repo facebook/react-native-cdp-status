@@ -8,14 +8,17 @@
 import { parseAndIndexCdpComments } from './CdpComments';
 
 describe('CdpComments', () => {
-  const files = [[{
-    github: {
-      owner: 'owner',
-      repo: 'repo',
-      commitSha: '00000000',
-      path: 'main.js',
-    }
-  }, `
+  const files = [
+    [
+      {
+        github: {
+          owner: 'owner',
+          repo: 'repo',
+          commitSha: '00000000',
+          path: 'main.js',
+        },
+      },
+      `
 // This is a single line comment mentioning @cdp symbol1
 /* @cdp symbol1 is mentioned in this block comment */
 /**
@@ -50,7 +53,12 @@ const y = 20; // This is another inline @cdp symbol1 comment
 
 // @cdp symbol1
 'NOTE: the comment above has no additional content'
-`]] as const;
+
+// @cdp symbol3's mentions can use punctuation without confusing the parser.
+// @cdp symbol3.@cdp symbol3, @cdp symbol3?
+`,
+    ],
+  ] as const;
 
   test('parseAndIndexCdpComments', () => {
     const result = parseAndIndexCdpComments(files);

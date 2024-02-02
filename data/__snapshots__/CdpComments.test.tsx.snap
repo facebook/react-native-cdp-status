@@ -166,6 +166,60 @@ note that the comment is indented
         "line": 27,
       },
     ],
+    "symbol3" => [
+      {
+        "cleanedText": "symbol3's mentions can use punctuation without confusing the parser.
+@cdp symbol3.@cdp symbol3, @cdp symbol3?",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 37,
+      },
+      {
+        "cleanedText": "symbol3's mentions can use punctuation without confusing the parser.
+@cdp symbol3.@cdp symbol3, @cdp symbol3?",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 37,
+      },
+      {
+        "cleanedText": "symbol3's mentions can use punctuation without confusing the parser.
+@cdp symbol3.@cdp symbol3, @cdp symbol3?",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 37,
+      },
+      {
+        "cleanedText": "symbol3's mentions can use punctuation without confusing the parser.
+@cdp symbol3.@cdp symbol3, @cdp symbol3?",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 37,
+      },
+    ],
   },
 }
 `;

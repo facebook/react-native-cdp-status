@@ -94,9 +94,7 @@ export function parseCdpComments(code: string): ParsedCdpComments {
   const comments = extractCStyleComments(code, ['@cdp']);
   const commentsByCdpSymbol = new Map<string, Array<CdpComment>>();
   for (const comment of comments) {
-    const cdpTagMatches = comment.cleanedMatch.matchAll(
-      /@cdp\s+([^\s]*[^\s.])/g,
-    );
+    const cdpTagMatches = comment.cleanedMatch.matchAll(/@cdp\s+([\w.]*\w)/g);
     const symbolsSeen = new Set<string>();
     for (const cdpTagMatch of cdpTagMatches) {
       const cdpSymbol = cdpTagMatch[1];
