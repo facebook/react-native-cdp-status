@@ -14,7 +14,7 @@ exports[`CdpComments parseAndIndexCdpComments 1`] = `
           "repo": "repo",
         },
         "hasAdditionalContent": true,
-        "line": 1,
+        "line": 2,
       },
       {
         "cleanedText": "symbol1 is mentioned in this block comment",
@@ -85,7 +85,7 @@ symbol1
       {
         "cleanedText": "symbol1
 @cdp symbol2",
-        "column": 4,
+        "column": 1,
         "github": {
           "commitSha": "00000000",
           "owner": "owner",
@@ -93,7 +93,7 @@ symbol1
           "repo": "repo",
         },
         "hasAdditionalContent": true,
-        "line": 15,
+        "line": 16,
       },
       {
         "cleanedText": "symbol1
@@ -120,14 +120,14 @@ symbol1
           "repo": "repo",
         },
         "hasAdditionalContent": false,
-        "line": 33,
+        "line": 34,
       },
     ],
     "symbol2" => [
       {
         "cleanedText": "symbol1
 @cdp symbol2",
-        "column": 4,
+        "column": 1,
         "github": {
           "commitSha": "00000000",
           "owner": "owner",
@@ -135,7 +135,7 @@ symbol1
           "repo": "repo",
         },
         "hasAdditionalContent": true,
-        "line": 15,
+        "line": 16,
       },
       {
         "cleanedText": "separate comment @cdp symbol2",
@@ -147,7 +147,7 @@ symbol1
           "repo": "repo",
         },
         "hasAdditionalContent": true,
-        "line": 18,
+        "line": 19,
       },
     ],
     "Domain.method" => [

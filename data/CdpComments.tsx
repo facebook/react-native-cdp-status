@@ -24,13 +24,19 @@ export type CdpComment = ReferenceLocation & {
   hasAdditionalContent: boolean;
 };
 
-function extractCStyleComments(code: string, tagsOfInterest: string[]): Array<CommentNode> {
+function extractCStyleComments(
+  code: string,
+  tagsOfInterest: string[],
+): Array<CommentNode> {
   const lineComment = '\\/\\/[^\n]*';
   const blockComment = '\\/\\*[\\s\\S]*?(?:\\*\\/|$)';
   const lineCommentBlock = `(?:^|\\n)[ \\t]*${lineComment}(?:\\n[ \\t]*${lineComment})*`;
   const inlineComment = '(?:[^\\n]*?)' + lineComment;
-  
-  const regex = new RegExp(`${lineCommentBlock}|${inlineComment}|${blockComment}`, 'g');
+
+  const regex = new RegExp(
+    `${lineCommentBlock}|${inlineComment}|${blockComment}`,
+    'g',
+  );
 
   const matches: Array<CommentNode> = [];
   const lc = lineColumn(code);
@@ -39,7 +45,8 @@ function extractCStyleComments(code: string, tagsOfInterest: string[]): Array<Co
     if (!tagsOfInterest.some((tag) => match[0].includes(tag))) {
       continue;
     }
-    const { line, col } = lc.fromIndex(match.index!)!;
+    const firstNonWhitespaceIndex = match.index! + match[0].search(/\S/);
+    const { line, col } = lc.fromIndex(firstNonWhitespaceIndex)!;
     matches.push({
       match: match[0],
       index: match.index!,
@@ -54,7 +61,9 @@ function extractCStyleComments(code: string, tagsOfInterest: string[]): Array<Co
 
 function cleanCommentSource(comment: string) {
   // Remove block comment start/end tokens
-  comment = comment.replace(/^\/\*\*?/, '').replace(/\*\/$/, '')
+  comment = comment
+    .replace(/^\/\*\*?/, '')
+    .replace(/\*\/$/, '')
     // Remove line comment start tokens
     .replace(/^\s*\/\/\s*/gm, '')
     // Remove leading asterisks from each line
@@ -62,8 +71,7 @@ function cleanCommentSource(comment: string) {
     // Remove leading/trailing newlines
     .replace(/^\n|\n$/g, '')
     // Remove trailing whitespace from all lines
-    .replace(/[ \t]+$/gm, '')
-    ;
+    .replace(/[ \t]+$/gm, '');
   // Find and trim the minimum leading whitespace on any non-empty line
   let minLeadingWhitespace = Infinity;
   const lines = comment.split('\n');
@@ -86,7 +94,9 @@ export function parseCdpComments(code: string): ParsedCdpComments {
   const comments = extractCStyleComments(code, ['@cdp']);
   const commentsByCdpSymbol = new Map<string, Array<CdpComment>>();
   for (const comment of comments) {
-    const cdpTagMatches = comment.cleanedMatch.matchAll(/@cdp\s+([^\s]*[^\s.])/g);
+    const cdpTagMatches = comment.cleanedMatch.matchAll(
+      /@cdp\s+([^\s]*[^\s.])/g,
+    );
     const symbolsSeen = new Set<string>();
     for (const cdpTagMatch of cdpTagMatches) {
       const cdpSymbol = cdpTagMatch[1];
@@ -95,33 +105,45 @@ export function parseCdpComments(code: string): ParsedCdpComments {
         if (symbolsSeen.has(cdpSymbol)) {
           continue;
         }
-        commentsByCdpSymbol.set(cdpSymbol, commentsByCdpSymbol.get(cdpSymbol) ?? []);
+        commentsByCdpSymbol.set(
+          cdpSymbol,
+          commentsByCdpSymbol.get(cdpSymbol) ?? [],
+        );
         commentsByCdpSymbol.get(cdpSymbol)!.push({
           line: comment.line,
           column: comment.column,
           // Further cleaned up version of the comment
           cleanedText: comment.cleanedMatch.replace(/^@cdp\s+/, ''),
           // Is there more to the comment than just the tag+symbol
-          hasAdditionalContent: comment.cleanedMatch.length > cdpTagMatch[0].length,
+          hasAdditionalContent:
+            comment.cleanedMatch.length > cdpTagMatch[0].length,
         });
       }
     }
   }
   return {
     commentsByCdpSymbol,
-  }
+  };
 }
 
 export type ParsedAndIndexedCdpComments = {
   commentsByCdpSymbol: Map<string, Array<CdpComment & ReferenceFile>>;
 };
 
-export function parseAndIndexCdpComments(files: Iterable<readonly [ReferenceFile, string]>): ParsedAndIndexedCdpComments {
-  const commentsByCdpSymbol = new Map<string, Array<CdpComment & ReferenceFile>>();
+export function parseAndIndexCdpComments(
+  files: Iterable<readonly [ReferenceFile, string]>,
+): ParsedAndIndexedCdpComments {
+  const commentsByCdpSymbol = new Map<
+    string,
+    Array<CdpComment & ReferenceFile>
+  >();
   for (const [file, code] of files) {
     const comments = parseCdpComments(code);
     for (const [cdpSymbol, cdpComments] of comments.commentsByCdpSymbol) {
-      commentsByCdpSymbol.set(cdpSymbol, commentsByCdpSymbol.get(cdpSymbol) ?? []);
+      commentsByCdpSymbol.set(
+        cdpSymbol,
+        commentsByCdpSymbol.get(cdpSymbol) ?? [],
+      );
       for (const cdpComment of cdpComments) {
         commentsByCdpSymbol.get(cdpSymbol)!.push({
           ...cdpComment,
@@ -132,5 +154,5 @@ export function parseAndIndexCdpComments(files: Iterable<readonly [ReferenceFile
   }
   return {
     commentsByCdpSymbol,
-  }
+  };
 }
