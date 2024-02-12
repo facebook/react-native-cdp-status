@@ -35,6 +35,38 @@ export async function ImplementationLink({
       );
       break;
 
+    case 'react-native':
+      linkContents = (
+        <>
+          React Native{' '}
+          <Image
+            src="/images/react-native-logo.svg"
+            width={20}
+            height={20}
+            alt=""
+            title="React Native"
+            className="inline-block mb-1"
+          />
+        </>
+      );
+      break;
+
+    case 'react-native-hermes':
+      linkContents = (
+        <>
+          React Native{' '}
+          <Image
+            src="/images/react-native-hermes-logo.svg"
+            width={20}
+            height={20}
+            alt=""
+            title="React Native + Hermes"
+            className="inline-block mb-1"
+          />
+        </>
+      );
+      break;
+
     default:
       linkContents = <span>{implementationId}</span>;
       break;

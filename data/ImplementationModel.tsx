@@ -8,26 +8,31 @@
 import { IProtocol, Protocol } from '@/third-party/protocol-schema';
 import { ProtocolModel } from './ProtocolModel';
 
-type ReferenceLocation = {
-  match: string;
-  index: number;
-  length: number;
+export type ReferenceLocation = ReferenceFile & {
   // 1-based
   line: number;
   // 1-based
   column: number;
-  github?: {
+}
+
+export type ReferenceFile = Readonly<{
+  github?: Readonly<{
     owner: string;
     repo: string;
     commitSha: string;
     path: string;
-  };
+  }>;
+}>
+
+export type ReferenceComment = ReferenceLocation & {
+  comment: string;
+  isContentfulComment: boolean;
 };
 
 export type ImplementationProtocolReferences = {
-  commands: Record<string, ReferenceLocation[]>;
-  events: Record<string, ReferenceLocation[]>;
-  types: Record<string, ReferenceLocation[]>;
+  commands: Record<string, (ReferenceLocation | ReferenceComment)[]>;
+  events: Record<string, (ReferenceLocation | ReferenceComment)[]>;
+  types: Record<string, (ReferenceLocation | ReferenceComment)[]>;
 };
 
 export type DataSourceMetadata = {
@@ -46,6 +51,7 @@ export interface ImplementationModel {
   getDataSourceMetadata(): Promise<DataSourceMetadata>;
   readonly displayName: string;
 }
+
 export abstract class ImplementationModelBase implements ImplementationModel {
   abstract readonly displayName: string;
   abstract extractProtocolReferences(
@@ -101,5 +107,51 @@ export abstract class ImplementationModelBase implements ImplementationModel {
         })),
       ] as const,
     });
+  }
+}
+
+export class MergedImplementationModel extends ImplementationModelBase {
+  readonly displayName: string;
+
+  constructor(
+    private readonly implementationModels: ImplementationModel[],
+  ) {
+    super();
+    this.displayName = implementationModels.map((model) => model.displayName).join(' + ');
+  }
+
+  async extractProtocolReferences(
+    protocol: IProtocol,
+  ): Promise<ImplementationProtocolReferences> {
+    const references: ImplementationProtocolReferences = {
+      commands: {},
+      events: {},
+      types: {},
+    };
+    for (const implementationModel of this.implementationModels) {
+      const implementationReferences =
+        await implementationModel.extractProtocolReferences(protocol);
+      for (const [key, value] of Object.entries(implementationReferences.commands)) {
+        references.commands[key] = [...(references.commands[key] ?? []), ...value];
+      }
+      for (const [key, value] of Object.entries(implementationReferences.events)) {
+        references.events[key] = [...(references.events[key] ?? []), ...value];
+      }
+      for (const [key, value] of Object.entries(implementationReferences.types)) {
+        references.types[key] = [...(references.types[key] ?? []), ...value];
+      }
+    }
+    return references;
+  }
+
+  async getDataSourceMetadata(): Promise<DataSourceMetadata> {
+    const metadata: DataSourceMetadata = {};
+    for (const implementationModel of this.implementationModels) {
+      const implementationMetadata = await implementationModel.getDataSourceMetadata();
+      if (!metadata.github && implementationMetadata.github) {
+        metadata.github = implementationMetadata.github;
+      }
+    }
+    return metadata;
   }
 }

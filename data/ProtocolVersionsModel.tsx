@@ -11,6 +11,7 @@ import { IProtocol } from '@/third-party/protocol-schema';
 import { octokit } from './github/octokit';
 import { Protocol } from '@/third-party/protocol-schema';
 import { ProtocolVersion, ProtocolVersionModel } from './ProtocolVersionModel';
+import { implementationModelsById } from './implementations';
 
 type DomainMemberBase = {
   experimental?: boolean;
@@ -182,7 +183,7 @@ export class ProtocolVersionsModel {
           'hermes',
           {
             protocol: async () => {
-              return await new HermesImplementationModel().filterProtocol(
+              return await implementationModelsById.get('hermes')!.filterProtocol(
                 totProtocol,
               );
             },
@@ -207,6 +208,33 @@ NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatic
             },
           },
         ],
+        [
+          'react-native-hermes',
+          {
+            protocol: async () => {
+              return await implementationModelsById.get('react-native-hermes')!.filterProtocol(
+                totProtocol,
+              );
+            },
+            metadata: {
+              description: `
+NOTE: The "React Native + Hermes" protocol version is a subset of \`latest\` filtered automatically to include only protocol messages implemented in React Native or Hermes (or both).
+`,
+              versionName: 'React Native + Hermes',
+              versionSlug: 'react-native-hermes',
+              dataSource: {
+                github: {
+                  owner: DEVTOOLS_PROTOCOL_REPO.owner,
+                  repo: DEVTOOLS_PROTOCOL_REPO.repo,
+                  commitSha:
+                    this.#devToolsProtocolRepoFetchMetadata.devToolsCommitSha,
+                  path: 'json/',
+                },
+              },
+              isAvailableUpstream: false,
+            }
+          }
+        ]
       ]);
     })();
     try {

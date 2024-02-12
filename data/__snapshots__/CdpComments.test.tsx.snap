@@ -1,0 +1,225 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CdpComments parseAndIndexCdpComments 1`] = `
+{
+  "commentsByCdpSymbol": Map {
+    "symbol1" => [
+      {
+        "cleanedText": "This is a single line comment mentioning @cdp symbol1",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 2,
+      },
+      {
+        "cleanedText": "symbol1 is mentioned in this block comment",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 3,
+      },
+      {
+        "cleanedText": "This is a multiline comment
+that also mentions @cdp symbol1
+",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 4,
+      },
+      {
+        "cleanedText": "const x = 10; // This is an inline @cdp symbol1 comment",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 8,
+      },
+      {
+        "cleanedText": "const y = 20; // This is another inline @cdp symbol1 comment",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 9,
+      },
+      {
+        "cleanedText": "This is a multiline comment
+with two lines
+mentioning @cdp
+symbol1
+",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 10,
+      },
+      {
+        "cleanedText": "symbol1
+@cdp symbol2",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 16,
+      },
+      {
+        "cleanedText": "symbol1
+- embedded markdown
+  - nested
+",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 21,
+      },
+      {
+        "cleanedText": "symbol1",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": false,
+        "line": 34,
+      },
+    ],
+    "symbol2" => [
+      {
+        "cleanedText": "symbol1
+@cdp symbol2",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 16,
+      },
+      {
+        "cleanedText": "separate comment @cdp symbol2",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 19,
+      },
+    ],
+    "Domain.method" => [
+      {
+        "cleanedText": "Domain.method
+note that the comment is indented
+",
+        "column": 7,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 27,
+      },
+    ],
+    "symbol3" => [
+      {
+        "cleanedText": "symbol3's mentions can use punctuation without confusing the parser.
+@cdp symbol3.@cdp symbol3, @cdp symbol3?",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 37,
+      },
+      {
+        "cleanedText": "symbol3's mentions can use punctuation without confusing the parser.
+@cdp symbol3.@cdp symbol3, @cdp symbol3?",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 37,
+      },
+      {
+        "cleanedText": "symbol3's mentions can use punctuation without confusing the parser.
+@cdp symbol3.@cdp symbol3, @cdp symbol3?",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 37,
+      },
+      {
+        "cleanedText": "symbol3's mentions can use punctuation without confusing the parser.
+@cdp symbol3.@cdp symbol3, @cdp symbol3?",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 37,
+      },
+    ],
+  },
+}
+`;

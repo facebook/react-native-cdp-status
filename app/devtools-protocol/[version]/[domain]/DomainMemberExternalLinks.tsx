@@ -42,6 +42,13 @@ export function DomainMemberExternalLinks({
         memberKey={memberKey}
         protocolImplementationData={protocolImplementationData}
       />
+      <DomainMemberImplementationLink
+        domain={domain}
+        implementationId="react-native"
+        kind={kind}
+        memberKey={memberKey}
+        protocolImplementationData={protocolImplementationData}
+      />
       <a href={cdpUrl} target="cdp-reference" title="View in CDP docs">
         <Image
           src="/images/chrome-devtools-circle-responsive.svg"

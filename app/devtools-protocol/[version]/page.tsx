@@ -50,10 +50,19 @@ export default async function ProtocolVersionPage({
         <ImplementationDataSourceDescription
           implementation={implementationModelsById.get('hermes')!}
         />
+        <ImplementationDataSourceDescription
+          implementation={implementationModelsById.get('react-native')!}
+        />
         <ImplementationStatsHeader />
         <ImplementationStats
           implementationId="hermes"
           implementation={implementationModelsById.get('hermes')!}
+          protocol={protocol.protocol}
+          protocolImplementationData={protocolImplementationData}
+        />
+        <ImplementationStats
+          implementationId="react-native-hermes"
+          implementation={implementationModelsById.get('react-native-hermes')!}
           protocol={protocol.protocol}
           protocolImplementationData={protocolImplementationData}
         />
