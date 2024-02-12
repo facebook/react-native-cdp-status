@@ -12,9 +12,9 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'CDP Implementation Tracker',
+  title: 'React Native CDP Status',
   description:
-    'Web app to track the implementation of the Chrome DevTools Protocol in React Native.',
+    'Explore the ongoing implementation of the Chrome DevTools Protocol in React Native.',
 };
 
 export default function RootLayout({
