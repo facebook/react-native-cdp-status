@@ -193,7 +193,7 @@ NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatic
 * Protocol messages currently implemented in Hermes.
 * Protocol types referenced transitively by those messages - including types that might not be implemented/referenced in the Hermes code.
   `,
-              versionName: 'hermes',
+              versionName: 'hermes (main)',
               versionSlug: 'hermes',
               dataSource: {
                 github: {
@@ -220,7 +220,7 @@ NOTE: The "Hermes" protocol version is a subset of \`latest\` filtered automatic
               description: `
 NOTE: The "React Native + Hermes" protocol version is a subset of \`latest\` filtered automatically to include only protocol messages implemented in React Native or Hermes (or both).
 `,
-              versionName: 'React Native + Hermes',
+              versionName: 'React Native + Hermes (main)',
               versionSlug: 'react-native-hermes',
               dataSource: {
                 github: {
