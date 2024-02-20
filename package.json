@@ -55,5 +55,8 @@
   "lint-staged": {
     "*.{js,ts,tsx}": "eslint --cache --fix",
     "*.{js,ts,tsx,css,md,json,scss}": "prettier --write"
+  },
+  "peerDependencies": {
+    "ip": "^2.0.1"
   }
 }
