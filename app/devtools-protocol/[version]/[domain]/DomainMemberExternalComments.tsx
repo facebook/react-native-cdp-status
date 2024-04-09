@@ -32,6 +32,17 @@ function CommentImplementationIcon({
           className="inline-block mb-1"
         />
       );
+    case 'hermes-legacy':
+      return (
+        <Image
+          src="/images/hermes-logo.svg"
+          width={20}
+          height={20}
+          alt=""
+          title="Hermes CDPHandler"
+          className="inline-block mb-1 grayscale"
+        />
+      );
     case 'react-native':
       return (
         <Image
@@ -171,6 +182,13 @@ export function DomainMemberExternalComments({
       <DomainMemberExternalCommentsForImplementation
         domain={domain}
         implementationId="hermes"
+        kind={kind}
+        memberKey={memberKey}
+        protocolImplementationData={protocolImplementationData}
+      />
+      <DomainMemberExternalCommentsForImplementation
+        domain={domain}
+        implementationId="hermes-legacy"
         kind={kind}
         memberKey={memberKey}
         protocolImplementationData={protocolImplementationData}

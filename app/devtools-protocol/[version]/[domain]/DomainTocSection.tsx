@@ -60,6 +60,14 @@ export function DomainTocSection({
                 />
                 <DomainMemberImplementationLink
                   domain={domain}
+                  implementationId="hermes-legacy"
+                  kind={kind}
+                  memberKey={key}
+                  protocolImplementationData={protocolImplementationData}
+                  small
+                />
+                <DomainMemberImplementationLink
+                  domain={domain}
                   implementationId="react-native"
                   kind={kind}
                   memberKey={key}

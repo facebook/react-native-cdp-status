@@ -61,6 +61,12 @@ export default async function ProtocolVersionPage({
           protocolImplementationData={protocolImplementationData}
         />
         <ImplementationStats
+          implementationId="hermes-legacy"
+          implementation={implementationModelsById.get('hermes-legacy')!}
+          protocol={protocol.protocol}
+          protocolImplementationData={protocolImplementationData}
+        />
+        <ImplementationStats
           implementationId="react-native-hermes"
           implementation={implementationModelsById.get('react-native-hermes')!}
           protocol={protocol.protocol}

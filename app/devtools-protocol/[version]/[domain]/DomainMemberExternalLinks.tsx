@@ -44,6 +44,13 @@ export function DomainMemberExternalLinks({
       />
       <DomainMemberImplementationLink
         domain={domain}
+        implementationId="hermes-legacy"
+        kind={kind}
+        memberKey={memberKey}
+        protocolImplementationData={protocolImplementationData}
+      />
+      <DomainMemberImplementationLink
+        domain={domain}
         implementationId="react-native"
         kind={kind}
         memberKey={memberKey}
