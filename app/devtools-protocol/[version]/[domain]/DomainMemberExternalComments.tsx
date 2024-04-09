@@ -28,7 +28,7 @@ function CommentImplementationIcon({
           width={20}
           height={20}
           alt=""
-          title="Hermes CDPHandler"
+          title="Hermes CDPAgent"
           className="inline-block mb-1"
         />
       );

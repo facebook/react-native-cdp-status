@@ -15,18 +15,15 @@ import { IProtocol } from '@/third-party/protocol-schema';
 import { octokit } from './github/octokit';
 import { fetchWithOptions } from './fetchWithOptions';
 import lineColumn from 'line-column';
-import {
-  ParsedAndIndexedCdpComments,
-  parseAndIndexCdpComments,
-} from './CdpComments';
 
-const HERMES_CDP_DIR = 'API/hermes/cdp';
+const CDP_HANDLER_CPP = 'API/hermes/inspector/chrome/CDPHandler.cpp';
+const MESSAGE_TYPES_H = 'API/hermes/inspector/chrome/MessageTypes.h';
 
 const HERMES_REPO_OWNER = 'facebook';
 const HERMES_REPO_NAME = 'hermes';
 const HERMES_REPO_BRANCH = 'main';
 
-export class HermesImplementationModel
+export class HermesLegacyImplementationModel
   extends ImplementationModelBase
   implements ImplementationModel
 {
@@ -34,10 +31,8 @@ export class HermesImplementationModel
     super();
   }
 
-  readonly displayName = 'Hermes';
+  readonly displayName = 'Hermes (CDPHandler)';
 
-  #cdpAgentSourcePaths: Array<string> = [];
-  #cdpCodegenSourcePaths: Array<string> = [];
   #files = new Map<string, string>();
   #repoFetchMetadata: {
     owner: string;
@@ -45,52 +40,12 @@ export class HermesImplementationModel
     commitSha: string;
   } | null = null;
   #fetchDataPromise: Promise<void> | undefined;
-  #indexedCdpComments: ParsedAndIndexedCdpComments | undefined;
-
-  async #listDirectory(path: string): Promise<
-    {
-      path: string;
-    }[]
-  > {
-    const { owner, repo, commitSha } = this.#repoFetchMetadata!;
-
-    const { data } = await octokit.rest.repos.getContent({
-      owner,
-      repo,
-      path,
-      ref: commitSha,
-      mediaType: {
-        format: 'raw',
-      },
-      request: {
-        fetch: fetchWithOptions({
-          next: {
-            revalidate: 3600, // 1 hour
-          },
-        }),
-      },
-    });
-    if (!Array.isArray(data)) {
-      throw new Error('Not a directory: ' + path);
-    }
-    const files = data;
-    // recurse into subdirectories
-    const subdirectories = files.filter((file) => file.type === 'dir');
-    const subdirectoryContents = await Promise.all(
-      subdirectories.map((subdirectory) =>
-        this.#listDirectory(subdirectory.path),
-      ),
-    );
-    const subdirectoryFiles = subdirectoryContents.flat();
-    return [...files, ...subdirectoryFiles];
-  }
 
   async #fetchFile(path: string) {
     if (this.#files.has(path)) {
       return;
     }
     const { owner, repo, commitSha } = this.#repoFetchMetadata!;
-
     const { data } = await octokit.rest.repos.getContent({
       owner,
       repo,
@@ -136,37 +91,10 @@ export class HermesImplementationModel
             commitSha: latestCommitSha,
           };
         }
-        const cdpSourcePaths = (await this.#listDirectory(HERMES_CDP_DIR))
-          .filter(
-            (file) => file.path.endsWith('.cpp') || file.path.endsWith('.h'),
-          )
-          .map((file) => file.path);
-        this.#cdpAgentSourcePaths = cdpSourcePaths.filter(
-          (path) => !path.includes('/Message'),
-        );
-        this.#cdpCodegenSourcePaths = cdpSourcePaths.filter((path) =>
-          path.includes('/Message'),
-        );
-        await Promise.all(
-          [...this.#cdpAgentSourcePaths, ...this.#cdpCodegenSourcePaths].map(
-            (path) => this.#fetchFile(path),
-          ),
-        );
-        this.#indexedCdpComments = parseAndIndexCdpComments(
-          this.#cdpAgentSourcePaths.map((path) => {
-            return [
-              {
-                github: {
-                  owner: HERMES_REPO_OWNER,
-                  repo: HERMES_REPO_NAME,
-                  commitSha: this.#repoFetchMetadata!.commitSha,
-                  path,
-                },
-              },
-              this.#files.get(path)!,
-            ];
-          }),
-        );
+        await Promise.all([
+          this.#fetchFile(CDP_HANDLER_CPP),
+          this.#fetchFile(MESSAGE_TYPES_H),
+        ]);
       } catch (e) {
         this.#fetchDataPromise = undefined;
         throw e;
@@ -189,11 +117,11 @@ export class HermesImplementationModel
       needles: string[],
     ) => {
       const regex = new RegExp(
-        '(\\b|(?<=\\s|[()]))' +
+        '\\b' +
           '(' +
           needles.map((needle) => escapeRegExp(needle)).join('|') +
           ')' +
-          '(\\b|(?=\\s|[()]))',
+          '\\b',
         'g',
       );
       for (const path of pathsToSearch) {
@@ -215,31 +143,8 @@ export class HermesImplementationModel
         }
       }
     };
-    const findAndPushCommentMentions = (
-      obj: typeof references.commands | typeof references.events,
-      name: string,
-    ) => {
-      const comments = this.#indexedCdpComments!.commentsByCdpSymbol.get(name);
-      if (!comments) {
-        return;
-      }
-      for (const comment of comments) {
-        obj[name] = obj[name] ?? [];
-        obj[name].push({
-          github: comment.github,
-          line: comment.line,
-          column: comment.column,
-          comment: comment.cleanedText,
-          isContentfulComment: comment.hasAdditionalContent,
-        });
-      }
-    };
     for (const domain of protocol.domains) {
       for (const command of domain.commands ?? []) {
-        findAndPushCommentMentions(
-          references.commands,
-          `${domain.domain}.${command.name}`,
-        );
         const hermesRequestId = `m::${pascalCaseToCamelCase(
           domain.domain,
         )}::${camelCaseToPascalCase(command.name)}Request`;
@@ -250,7 +155,7 @@ export class HermesImplementationModel
           `${domain.domain}.${command.name}`,
         );
         findAndPushMatches(
-          this.#cdpAgentSourcePaths,
+          [CDP_HANDLER_CPP],
           references.commands,
           `${domain.domain}.${command.name}`,
           [hermesRequestId, hermesResponseId, stringLiteral],
@@ -261,12 +166,8 @@ export class HermesImplementationModel
           domain.domain,
         )}::${camelCaseToPascalCase(event.name)}Notification`;
         const stringLiteral = quoteCppString(`${domain.domain}.${event.name}`);
-        findAndPushCommentMentions(
-          references.events,
-          `${domain.domain}.${event.name}`,
-        );
         findAndPushMatches(
-          this.#cdpAgentSourcePaths,
+          [CDP_HANDLER_CPP],
           references.events,
           `${domain.domain}.${event.name}`,
           [hermesEventId, stringLiteral],
@@ -276,12 +177,8 @@ export class HermesImplementationModel
         const hermesTypeId = `${pascalCaseToCamelCase(
           domain.domain,
         )}::${camelCaseToPascalCase(type.id)}`;
-        findAndPushCommentMentions(
-          references.types,
-          `${domain.domain}.${type.id}`,
-        );
         findAndPushMatches(
-          this.#cdpAgentSourcePaths,
+          [MESSAGE_TYPES_H],
           references.types,
           `${domain.domain}.${type.id}`,
           [hermesTypeId],

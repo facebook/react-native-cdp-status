@@ -56,6 +56,8 @@ const y = 20; // This is another inline @cdp symbol1 comment
 
 // @cdp symbol3's mentions can use punctuation without confusing the parser.
 // @cdp symbol3.@cdp symbol3, @cdp symbol3?
+
+/// @cdp symbol4 in a doxygen-style comment
 `,
     ],
   ] as const;
