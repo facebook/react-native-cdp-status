@@ -168,6 +168,13 @@ export function DomainMemberExternalComments({
         memberKey={memberKey}
         protocolImplementationData={protocolImplementationData}
       />
+      <DomainMemberExternalCommentsForImplementation
+        domain={domain}
+        implementationId="hermes"
+        kind={kind}
+        memberKey={memberKey}
+        protocolImplementationData={protocolImplementationData}
+      />
     </div>
   );
 }
