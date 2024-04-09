@@ -40,7 +40,7 @@ export function DomainMemberHeading({
         protocolMetadata={protocolMetadata}
       />
       <h3
-        className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto font-mono"
+        className="font-bold text-lg mt-4 mb-2 max-w-5xl mx-auto font-mono"
         id={`${kind}-${encodeURIComponent(key)}`}
       >
         <DimText>{domain}.</DimText>

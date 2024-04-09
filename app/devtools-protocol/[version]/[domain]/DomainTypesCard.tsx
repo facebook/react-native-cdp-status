@@ -30,7 +30,7 @@ export function DomainTypesCard({
     domain.types != null &&
     domain.types.length !== 0 && (
       <>
-        <h2 className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto">Types</h2>
+        <h2 className="font-bold text-lg mt-4 mb-2 max-w-5xl mx-auto">Types</h2>
         <Card>
           {domain.types.map((type, index) => (
             <div key={type.id} className="group">
