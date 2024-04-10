@@ -281,7 +281,7 @@ export class HermesImplementationModel
           `${domain.domain}.${type.id}`,
         );
         findAndPushMatches(
-          this.#cdpAgentSourcePaths,
+          this.#cdpCodegenSourcePaths,
           references.types,
           `${domain.domain}.${type.id}`,
           [hermesTypeId],
