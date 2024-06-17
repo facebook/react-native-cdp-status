@@ -6,10 +6,12 @@
  */
 
 import { HermesImplementationModel } from './HermesImplementationModel';
+import { HermesLegacyImplementationModel } from './HermesLegacyImplementationModel';
 import { ImplementationModel, MergedImplementationModel } from './ImplementationModel';
 import { ReactNativeImplementationModel } from './ReactNativeImplementationModel';
 
 const hermesImplementationModel = new HermesImplementationModel();
+const hermesLegacyImplementationModel = new HermesLegacyImplementationModel();
 const reactNativeImplementationModel = new ReactNativeImplementationModel();
 
 export const implementationModelsById: ReadonlyMap<
@@ -17,6 +19,7 @@ export const implementationModelsById: ReadonlyMap<
   ImplementationModel
 > = new Map<string, ImplementationModel>([
   ['hermes', hermesImplementationModel],
+  ['hermes-legacy', hermesLegacyImplementationModel],
   ['react-native', reactNativeImplementationModel],
   ['react-native-hermes', new MergedImplementationModel([reactNativeImplementationModel, hermesImplementationModel])],
 ]);

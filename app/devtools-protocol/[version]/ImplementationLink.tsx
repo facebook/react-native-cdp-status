@@ -28,13 +28,29 @@ export async function ImplementationLink({
             width={20}
             height={20}
             alt=""
-            title="Hermes CDPHandler"
+            title="Hermes CDPAgent"
             className="inline-block mb-1"
           />
         </>
       );
       break;
 
+    case 'hermes-legacy':
+      linkContents = (
+        <>
+          Hermes (legacy){' '}
+          <Image
+            src="/images/hermes-logo.svg"
+            width={20}
+            height={20}
+            alt=""
+            title="Hermes CDPHandler"
+            className="inline-block mb-1 grayscale"
+          />
+        </>
+      );
+      break;
+      
     case 'react-native':
       linkContents = (
         <>

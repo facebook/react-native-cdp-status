@@ -65,7 +65,7 @@ function cleanCommentSource(comment: string) {
     .replace(/^\/\*\*?/, '')
     .replace(/\*\/$/, '')
     // Remove line comment start tokens
-    .replace(/^\s*\/\/\s*/gm, '')
+    .replace(/^\s*\/\/\/?\s*/gm, '')
     // Remove leading asterisks from each line
     .replace(/^\s*\* ?/gm, '')
     // Remove leading/trailing newlines

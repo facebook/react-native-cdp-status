@@ -220,6 +220,20 @@ note that the comment is indented
         "line": 37,
       },
     ],
+    "symbol4" => [
+      {
+        "cleanedText": "symbol4 in a doxygen-style comment",
+        "column": 1,
+        "github": {
+          "commitSha": "00000000",
+          "owner": "owner",
+          "path": "main.js",
+          "repo": "repo",
+        },
+        "hasAdditionalContent": true,
+        "line": 40,
+      },
+    ],
   },
 }
 `;

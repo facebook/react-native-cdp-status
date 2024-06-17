@@ -29,7 +29,7 @@ export function DomainMethodsCard({
     domain.commands != null &&
     domain.commands?.length !== 0 && (
       <>
-        <h2 className="font-bold text-lg mt-4 mb-2 max-w-4xl mx-auto">
+        <h2 className="font-bold text-lg mt-4 mb-2 max-w-5xl mx-auto">
           Methods
         </h2>
         <Card>

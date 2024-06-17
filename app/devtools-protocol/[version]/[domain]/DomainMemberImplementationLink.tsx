@@ -18,7 +18,7 @@ export function DomainMemberImplementationLink({
   protocolImplementationData,
   small,
 }: {
-  implementationId: 'hermes' | 'react-native' | 'react-native-hermes';
+  implementationId: 'hermes' | 'hermes-legacy' | 'react-native' | 'react-native-hermes';
   kind: 'method' | 'event' | 'type';
   domain: string;
   memberKey: string;
@@ -42,8 +42,21 @@ export function DomainMemberImplementationLink({
           width={small ? 20 : 24}
           height={small ? 20 : 24}
           alt="Hermes"
-          title="Referenced in Hermes CDPHandler"
+          title="Referenced in Hermes CDPAgent"
           className="inline-block"
+        />
+      );
+      break;
+    }
+    case 'hermes-legacy': {
+      linkContents = (
+        <Image
+          src="/images/hermes-logo.svg"
+          width={small ? 20 : 24}
+          height={small ? 20 : 24}
+          alt="Hermes (Legacy)"
+          title="Referenced in Hermes CDPHandler"
+          className="inline-block grayscale"
         />
       );
       break;
