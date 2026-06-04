@@ -15,13 +15,14 @@ import { DomainEventsCard } from './DomainEventsCard';
 import { DomainTypesCard } from './DomainTypesCard';
 
 export default async function ProtocolVersionDomainPage({
-  params: { version, domain: domainName },
+  params,
 }: {
-  params: {
+  params: Promise<{
     version: string;
     domain: string;
-  };
+  }>;
 }) {
+  const { version, domain: domainName } = await params;
   const protocolVersion =
     await protocolVersionsModel.protocolVersionBySlug(version);
   if (!protocolVersion) {
