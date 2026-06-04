@@ -15,12 +15,7 @@ const nextConfig = {
       'data',
       'eslint',
     ],
-    files: [
-      'next.config.js',
-      'postcss.config.js',
-      'tailwind.config.js',
-    ],
-  }
+  },
 };
 
 module.exports = nextConfig;

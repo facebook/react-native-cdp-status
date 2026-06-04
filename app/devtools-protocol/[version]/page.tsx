@@ -20,12 +20,13 @@ import {
 import { ImplementationDataSourceDescription } from './ImplementationDataSourceDescription';
 
 export default async function ProtocolVersionPage({
-  params: { version },
+  params,
 }: {
-  params: {
+  params: Promise<{
     version: string;
-  };
+  }>;
 }) {
+  const { version } = await params;
   const protocolVersion =
     await protocolVersionsModel.protocolVersionBySlug(version);
   if (!protocolVersion) {

@@ -13,14 +13,15 @@ import { ProtocolVersionModel } from '@/data/ProtocolVersionModel';
 import { ProtocolDomainNavItem } from './layout-client';
 
 export default async function Layout({
-  params: { version },
+  params,
   children,
 }: {
-  params: {
+  params: Promise<{
     version: string;
-  };
+  }>;
   children: React.ReactNode;
 }) {
+  const { version } = await params;
   const protocolVersion =
     await protocolVersionsModel.protocolVersionBySlug(version);
   if (!protocolVersion) {
